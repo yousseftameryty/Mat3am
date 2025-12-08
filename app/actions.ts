@@ -173,54 +173,62 @@ export async function getOrderByTable(tableId: number) {
       })
   }
 
-  // Try to fetch order with order_items
-  const { data: order, error: orderError } = await supabase
+  // Try to fetch order - first try simple query to ensure we get the order
+  const { data: simpleOrder, error: simpleError } = await supabase
     .from('orders')
-    .select(`
-      *,
-      order_items (
-        *,
-        menu_items (
-          name,
-          category
-        )
-      )
-    `)
+    .select('*')
     .eq('table_id', tableId)
     .in('status', ['pending', 'cooking', 'ready', 'served', 'waiting_payment'])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  if (orderError) {
-    console.error('Error fetching order with items:', orderError);
-    // Try without order_items if that fails
-    const { data: simpleOrder, error: simpleError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('table_id', tableId)
-      .in('status', ['pending', 'cooking', 'ready', 'served', 'waiting_payment'])
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    
-    if (simpleError) {
-      return { success: false, error: simpleError.message, data: null }
-    }
-    
-    if (!simpleOrder) {
-      return { success: false, error: 'No active order found', data: null }
-    }
-    
-    // Return order without items if items query failed
-    return { success: true, data: { ...simpleOrder, order_items: [] } }
+  if (simpleError) {
+    console.error('[getOrderByTable] Error fetching order:', simpleError);
+    return { success: false, error: simpleError.message, data: null }
   }
 
-  if (!order) {
+  if (!simpleOrder) {
+    console.log(`[getOrderByTable] No active order found for table ${tableId}`);
     return { success: false, error: 'No active order found', data: null }
   }
 
-  return { success: true, data: order }
+  console.log(`[getOrderByTable] Found order ${simpleOrder.id}, fetching items...`);
+
+  // Now try to fetch order_items separately
+  const { data: orderItems, error: itemsError } = await supabase
+    .from('order_items')
+    .select(`
+      *,
+      menu_items (
+        name,
+        category
+      )
+    `)
+    .eq('order_id', simpleOrder.id)
+
+  if (itemsError) {
+    console.error('[getOrderByTable] Error fetching order items:', itemsError);
+    // Return order even if items query fails (items might be empty or still being created)
+    return { 
+      success: true, 
+      data: { 
+        ...simpleOrder, 
+        order_items: [] 
+      } 
+    }
+  }
+
+  console.log(`[getOrderByTable] Successfully fetched order with ${orderItems?.length || 0} items`);
+
+  // Return order with items
+  return { 
+    success: true, 
+    data: { 
+      ...simpleOrder, 
+      order_items: orderItems || [] 
+    } 
+  }
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
