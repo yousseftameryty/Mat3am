@@ -90,7 +90,6 @@ export default function QRPrintPage() {
             <h2 className="text-xl font-black mb-4 uppercase tracking-widest">Table {tableNum}</h2>
             
             <div className="bg-white p-2 rounded-lg shadow-sm">
-              {/* @ts-expect-error - react-qr-code component type issue */}
               <QRCode 
                 value={`${baseUrl}/table/${tableNum}`} 
                 size={150} 
