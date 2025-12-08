@@ -200,9 +200,6 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
         // Clear cart immediately
         setCart([]);
         
-        // Clear cart immediately
-        setCart([]);
-        
         setShowSuccess(true);
         // Wait for order to be committed, then fetch with retry logic
         setTimeout(() => {
