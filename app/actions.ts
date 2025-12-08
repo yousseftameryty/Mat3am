@@ -88,10 +88,11 @@ export async function createOrder(
         .from('orders')
         .select('id, status')
         .eq('id', existingTable.current_order_id)
-        .in('status', ['pending', 'cooking', 'ready', 'served'])
+        .in('status', ['pending', 'cooking', 'ready', 'served', 'waiting_payment'])
         .single()
 
       if (activeOrder) {
+        console.log(`[createOrder] Table ${tableId} is occupied with order ${activeOrder.id}, status: ${activeOrder.status}`);
         // Table is occupied - only allow if it's the same device (validationData would have matching fingerprint)
         // For now, we'll reject to prevent abuse
         return { 
@@ -99,6 +100,8 @@ export async function createOrder(
           error: `Table ${tableId} is currently occupied. Please wait or contact staff.`,
           redirectToTable: validationData?.originalTableId || null
         };
+      } else {
+        console.log(`[createOrder] Table ${tableId} marked as occupied but no active order found, allowing new order`);
       }
     }
   }
