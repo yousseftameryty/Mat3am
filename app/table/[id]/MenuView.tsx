@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { createOrder } from "@/app/actions";
-import { getDeviceFingerprint, getTableAccess, getRecentOrderAttempts, recordTableAccess } from "@/utils/deviceFingerprint";
+import { getDeviceFingerprint, getTableAccess, getOriginalTable, recordTableAccess } from "@/utils/deviceFingerprint";
+import { useRouter } from "next/navigation";
 
 const CATEGORIES = [
   { id: "all", name: "All Items", icon: Grid3X3 },
@@ -59,6 +60,7 @@ type MenuViewProps = {
 };
 
 export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
+  const router = useRouter();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -143,20 +145,22 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
       // Gather validation data for security
       const fingerprint = getDeviceFingerprint();
       const tableAccess = getTableAccess(tableId);
-      const recentAttempts = getRecentOrderAttempts();
-      
-      // Count recent attempts for this device
-      const recentOrderAttempts = recentAttempts.filter(
-        (attempt) => attempt.fingerprint === fingerprint
-      ).length;
+      const originalTable = getOriginalTable();
 
       const validationData = {
         deviceFingerprint: fingerprint,
         tableAccessTimestamp: tableAccess?.timestamp || Date.now(),
-        recentOrderAttempts,
+        originalTableId: originalTable,
       };
 
       const result = await createOrder(tableId, cart, total, validationData);
+      
+      // Silent redirect if trying to order for different table
+      if (!result.success && result.redirectToTable && result.redirectToTable !== tableId) {
+        router.push(`/table/${result.redirectToTable}`);
+        return;
+      }
+      
       if (result.success) {
         // Record successful order attempt
         recordTableAccess(tableId);
@@ -166,7 +170,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
           setShowSuccess(false);
           onOrderCreated();
         }, 2000);
-      } else {
+      } else if (result.error) {
         alert(`❌ Error: ${result.error}`);
       }
     } catch (error) {

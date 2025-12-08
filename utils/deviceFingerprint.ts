@@ -95,14 +95,29 @@ export function getTableAccess(tableId: number): { tableId: number; fingerprint:
 }
 
 /**
- * Get recent order attempts (for rate limiting)
+ * Get the original table this device first accessed
  */
-export function getRecentOrderAttempts(): Array<{ tableId: number; fingerprint: string; timestamp: number }> {
-  if (typeof window === 'undefined') return [];
+export function getOriginalTable(): number | null {
+  if (typeof window === 'undefined') return null;
   
   const log = JSON.parse(localStorage.getItem('order_access_log') || '[]');
-  const twoMinutesAgo = Date.now() - (2 * 60 * 1000);
+  if (log.length === 0) return null;
   
-  return log.filter((entry: { timestamp: number }) => entry.timestamp > twoMinutesAgo);
+  // Return the first table accessed (oldest entry)
+  const firstAccess = log[0];
+  return firstAccess?.tableId || null;
+}
+
+/**
+ * Check if device has accessed a table recently
+ */
+export function hasRecentTableAccess(tableId: number, maxAgeMinutes: number = 10): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const access = getTableAccess(tableId);
+  if (!access) return false;
+  
+  const maxAge = maxAgeMinutes * 60 * 1000;
+  return (Date.now() - access.timestamp) < maxAge;
 }
 

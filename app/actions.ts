@@ -12,7 +12,7 @@ type CartItem = {
 type OrderValidationData = {
   deviceFingerprint: string;
   tableAccessTimestamp: number;
-  recentOrderAttempts: number;
+  originalTableId: number | null;
 };
 
 export async function createOrder(
@@ -33,15 +33,17 @@ export async function createOrder(
     if (timeSinceAccess > TEN_MINUTES) {
       return { 
         success: false, 
-        error: 'Table access expired. Please scan the QR code again.' 
+        error: 'Table access expired. Please scan the QR code again.',
+        redirectToTable: validationData.originalTableId || null
       };
     }
 
-    // 2. Rate limiting: Max 1 order per device per 2 minutes
-    if (validationData.recentOrderAttempts > 0) {
+    // 2. Silent redirect: If trying to order for different table, redirect to original
+    if (validationData.originalTableId && validationData.originalTableId !== tableId) {
       return { 
         success: false, 
-        error: 'Please wait a moment before placing another order.' 
+        error: null, // No error message - silent redirect
+        redirectToTable: validationData.originalTableId
       };
     }
 
@@ -68,7 +70,7 @@ export async function createOrder(
 
     if (tableError) {
       console.error('Table Creation Error:', tableError)
-      return { success: false, error: `Failed to create table ${tableId}: ${tableError.message}` }
+      return { success: false, error: `Failed to create table ${tableId}: ${tableError.message}`, redirectToTable: null }
     }
   } else {
     // 4. Table occupancy check: Prevent ordering for occupied tables
@@ -87,7 +89,8 @@ export async function createOrder(
         // For now, we'll reject to prevent abuse
         return { 
           success: false, 
-          error: `Table ${tableId} is currently occupied. Please wait or contact staff.` 
+          error: `Table ${tableId} is currently occupied. Please wait or contact staff.`,
+          redirectToTable: validationData?.originalTableId || null
         };
       }
     }
@@ -106,7 +109,7 @@ export async function createOrder(
 
   if (orderError) {
     console.error('Order Error:', orderError)
-    return { success: false, error: orderError.message }
+    return { success: false, error: orderError.message, redirectToTable: null }
   }
 
   // 2. Create Order Items
@@ -124,7 +127,7 @@ export async function createOrder(
 
   if (itemsError) {
     console.error('Items Error:', itemsError)
-    return { success: false, error: itemsError.message }
+    return { success: false, error: itemsError.message, redirectToTable: null }
   }
 
   // 3. Update Table Status to Occupied
@@ -136,7 +139,7 @@ export async function createOrder(
   // 4. Refresh Data
   revalidatePath('/cashier')
   
-  return { success: true, orderId: order.id }
+  return { success: true, orderId: order.id, redirectToTable: null }
 }
 
 export async function getOrderByTable(tableId: number) {
