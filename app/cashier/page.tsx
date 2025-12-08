@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, usePathname } from "next/navigation";
 import { 
   Search, ShoppingBag, UtensilsCrossed, Coffee, 
   Pizza, Beer, Plus, Minus, 
@@ -58,6 +59,8 @@ type CartItem = {
 
 // --- COMPONENT ---
 export default function CashierDashboard() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -66,6 +69,13 @@ export default function CashierDashboard() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tables, setTables] = useState<number[]>([]);
+
+  const navItems = [
+    { name: 'POS', path: '/cashier', icon: Grid3X3 },
+    { name: 'Orders', path: '/cashier/orders', icon: ShoppingBag },
+    { name: 'Tables', path: '/cashier/tables', icon: User },
+    { name: 'Settings', path: '/cashier/settings', icon: CreditCard },
+  ];
 
   // Fetch menu items from Supabase
   useEffect(() => {
@@ -183,19 +193,27 @@ export default function CashierDashboard() {
         </div>
         
         <div className="flex flex-col gap-6 w-full px-4">
-          {['POS', 'Orders', 'Tables', 'Settings'].map((item, i) => (
-            <button key={item} className={`p-3 rounded-xl transition-all duration-300 group relative flex justify-center ${i === 0 ? 'bg-white/10 text-orange-400' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}>
-               {i === 0 && <Grid3X3 />} 
-               {i === 1 && <ShoppingBag />} 
-               {i === 2 && <User />} 
-               {i === 3 && <CreditCard />}
-               
-               {/* Tooltip */}
-               <span className="absolute left-14 bg-neutral-800 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
-                 {item}
-               </span>
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname === item.path;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.name}
+                onClick={() => router.push(item.path)}
+                className={`p-3 rounded-xl transition-all duration-300 group relative flex justify-center ${
+                  isActive 
+                    ? 'bg-white/10 text-orange-400' 
+                    : 'text-gray-500 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Icon size={20} />
+                {/* Tooltip */}
+                <span className="absolute left-14 bg-neutral-800 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none z-50">
+                  {item.name}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 

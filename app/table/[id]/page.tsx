@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { getOrderByTable } from "@/app/actions";
+import MenuView from "./MenuView";
 
 type OrderItem = {
   id: number;
@@ -74,8 +75,7 @@ export default function CustomerTablePage() {
             filter: `table_id=eq.${tableId}`,
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (payload: any) => {
-            console.log('Order updated:', payload);
+          (_payload: unknown) => {
             fetchOrder();
           }
         )
@@ -103,15 +103,9 @@ export default function CustomerTablePage() {
     );
   }
 
+  // Show menu if no order exists
   if (error || !order) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">No Active Order</h2>
-          <p className="text-gray-500">{error || "Please place an order at the cashier first."}</p>
-        </div>
-      </div>
-    );
+    return <MenuView tableId={tableId} onOrderCreated={fetchOrder} />;
   }
 
   return (
