@@ -12,6 +12,29 @@ type CartItem = {
 export async function createOrder(tableId: number, cartItems: CartItem[], total: number) {
   const supabase = await createClient()
 
+  // 0. Check if table exists, create it if it doesn't
+  const { data: existingTable } = await supabase
+    .from('restaurant_tables')
+    .select('id')
+    .eq('id', tableId)
+    .single()
+
+  if (!existingTable) {
+    // Create the table if it doesn't exist
+    const { error: tableError } = await supabase
+      .from('restaurant_tables')
+      .insert({
+        id: tableId,
+        status: 'empty',
+        current_order_id: null
+      })
+
+    if (tableError) {
+      console.error('Table Creation Error:', tableError)
+      return { success: false, error: `Failed to create table ${tableId}: ${tableError.message}` }
+    }
+  }
+
   // 1. Create the Order
   const { data: order, error: orderError } = await supabase
     .from('orders')
