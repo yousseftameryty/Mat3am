@@ -8,7 +8,7 @@ import {
   Utensils, CreditCard, MessageSquare, Loader2
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { getOrderByTable } from "@/app/actions";
+import { getOrderByTable, updateOrderStatus } from "@/app/actions";
 import MenuView from "./MenuView";
 import { recordTableAccess } from "@/utils/deviceFingerprint";
 
@@ -115,6 +115,17 @@ export default function CustomerTablePage() {
   const serviceCharge = total * 0.10;
   const finalTotal = total + serviceCharge;
 
+  const handleRequestPayment = async () => {
+    if (!order) return;
+    
+    const result = await updateOrderStatus(order.id, 'waiting_payment');
+    if (result.success) {
+      // Status updated, will refresh via real-time subscription
+    } else {
+      alert(`❌ Error: ${result.error || 'Failed to request payment'}`);
+    }
+  };
+
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
@@ -196,6 +207,21 @@ export default function CustomerTablePage() {
                     </div>
                     <h2 className="mt-6 text-2xl font-bold text-white">Order Served</h2>
                     <p className="text-gray-500 text-sm mt-1">Enjoy your meal!</p>
+                </motion.div>
+            )}
+
+            {status === 'waiting_payment' && (
+                 <motion.div 
+                    key="waiting_payment"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex flex-col items-center"
+                >
+                    <div className="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-2xl shadow-yellow-500/20">
+                        <CreditCard className="text-white w-10 h-10" />
+                    </div>
+                    <h2 className="mt-6 text-2xl font-bold text-white">Waiting for Waiter</h2>
+                    <p className="text-gray-500 text-sm mt-1">Waiter will arrive with POS machine shortly</p>
                 </motion.div>
             )}
 
@@ -304,21 +330,41 @@ export default function CustomerTablePage() {
       </div>
 
       {/* --- ACTION BUTTONS (Floating) --- */}
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 2, type: 'spring' }}
-        className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40"
-      >
-        <div className="flex gap-3 max-w-md mx-auto">
-            <button className="flex-1 bg-neutral-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                <MessageSquare size={18} /> Call Waiter
-            </button>
-            <button className="flex-[2] bg-white text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-white/10 active:scale-95 transition-transform">
-                <CreditCard size={18} /> Pay ${finalTotal.toFixed(2)}
-            </button>
-        </div>
-      </motion.div>
+      {status === 'served' && (
+        <motion.div 
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 2, type: 'spring' }}
+          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40"
+        >
+          <div className="flex gap-3 max-w-md mx-auto">
+              <button className="flex-1 bg-neutral-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                  <MessageSquare size={18} /> Call Waiter
+              </button>
+              <button 
+                onClick={handleRequestPayment}
+                className="flex-[2] bg-white text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-white/10 active:scale-95 transition-transform hover:bg-gray-100"
+              >
+                  <CreditCard size={18} /> Pay ${finalTotal.toFixed(2)}
+              </button>
+          </div>
+        </motion.div>
+      )}
+      
+      {status !== 'served' && status !== 'waiting_payment' && (
+        <motion.div 
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 2, type: 'spring' }}
+          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40"
+        >
+          <div className="flex gap-3 max-w-md mx-auto">
+              <button className="flex-1 bg-neutral-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                  <MessageSquare size={18} /> Call Waiter
+              </button>
+          </div>
+        </motion.div>
+      )}
 
     </div>
   );

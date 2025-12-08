@@ -159,7 +159,7 @@ export async function getOrderByTable(tableId: number) {
       )
     `)
     .eq('table_id', tableId)
-    .in('status', ['pending', 'cooking', 'ready', 'served'])
+    .in('status', ['pending', 'cooking', 'ready', 'served', 'waiting_payment'])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
