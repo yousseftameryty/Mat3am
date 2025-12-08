@@ -4,11 +4,13 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, ShoppingBag, UtensilsCrossed, Coffee, 
-  Pizza, Beer, Dessert, Trash2, Plus, Minus, 
+  Pizza, Beer, Plus, Minus, 
   CreditCard, User, Grid3X3, ChefHat, CheckCircle
 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { createOrder } from "../actions";
 
-// --- MOCK DATA ---
+// --- CATEGORIES ---
 const CATEGORIES = [
   { id: "all", name: "All Items", icon: Grid3X3 },
   { id: "burger", name: "Burgers", icon: UtensilsCrossed },
@@ -17,19 +19,36 @@ const CATEGORIES = [
   { id: "alcohol", name: "Bar", icon: Beer },
 ];
 
-const MENU_ITEMS = [
-  { id: 1, name: "Neon Burger", price: 18.50, category: "burger", emoji: "🍔", bg: "bg-orange-500/20" },
-  { id: 2, name: "Cyber Fries", price: 6.00, category: "burger", emoji: "🍟", bg: "bg-yellow-500/20" },
-  { id: 3, name: "Void Pizza", price: 22.00, category: "pizza", emoji: "🍕", bg: "bg-red-500/20" },
-  { id: 4, name: "Quantum Coke", price: 3.50, category: "drink", emoji: "🥤", bg: "bg-blue-500/20" },
-  { id: 5, name: "Matrix Mojito", price: 12.00, category: "alcohol", emoji: "🍹", bg: "bg-green-500/20" },
-  { id: 6, name: "Glitch Steak", price: 45.00, category: "burger", emoji: "🥩", bg: "bg-rose-500/20" },
-  { id: 7, name: "Data Pasta", price: 16.00, category: "pizza", emoji: "🍝", bg: "bg-amber-500/20" },
-  { id: 8, name: "Binary Beer", price: 8.00, category: "alcohol", emoji: "🍺", bg: "bg-yellow-600/20" },
-  { id: 9, name: "Cloud Cake", price: 9.00, category: "pizza", emoji: "🍰", bg: "bg-pink-500/20" },
+// Emoji mapping for menu items
+const EMOJI_MAP: Record<string, string> = {
+  burger: "🍔",
+  pizza: "🍕",
+  drink: "🥤",
+  alcohol: "🍹",
+};
+
+const BG_COLORS = [
+  "bg-orange-500/20",
+  "bg-yellow-500/20",
+  "bg-red-500/20",
+  "bg-blue-500/20",
+  "bg-green-500/20",
+  "bg-rose-500/20",
+  "bg-amber-500/20",
+  "bg-yellow-600/20",
+  "bg-pink-500/20",
 ];
 
 // --- TYPES ---
+type MenuItem = {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  emoji?: string;
+  bg?: string;
+};
+
 type CartItem = {
   id: number;
   name: string;
@@ -44,17 +63,62 @@ export default function CashierDashboard() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tables, setTables] = useState<number[]>([]);
+
+  // Fetch menu items from Supabase
+  useEffect(() => {
+    async function fetchData() {
+      const supabase = createClient();
+      
+      // Fetch menu items
+      const { data: items, error: itemsError } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('is_available', true)
+        .order('name');
+
+      if (itemsError) {
+        console.error('Error fetching menu items:', itemsError);
+      } else {
+        const itemsWithEmoji = items.map((item: { id: number; name: string; price: string; category: string }, idx: number) => ({
+          ...item,
+          price: parseFloat(item.price),
+          emoji: EMOJI_MAP[item.category] || "🍽️",
+          bg: BG_COLORS[idx % BG_COLORS.length],
+        }));
+        setMenuItems(itemsWithEmoji);
+      }
+
+      // Fetch tables
+      const { data: tablesData, error: tablesError } = await supabase
+        .from('restaurant_tables')
+        .select('id')
+        .order('id');
+
+      if (tablesError) {
+        console.error('Error fetching tables:', tablesError);
+      } else {
+        setTables(tablesData.map((t: { id: number }) => t.id));
+      }
+
+      setLoading(false);
+    }
+
+    fetchData();
+  }, []);
 
   // --- LOGIC ---
   const filteredItems = useMemo(() => {
-    return MENU_ITEMS.filter((item) => {
+    return menuItems.filter((item) => {
       const matchesCategory = activeCategory === "all" || item.category === activeCategory;
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, menuItems]);
 
-  const addToCart = (item: any) => {
+  const addToCart = (item: MenuItem) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
@@ -84,13 +148,29 @@ export default function CashierDashboard() {
         alert("⚠️ Please select a table first!");
         return;
     }
+    if (cart.length === 0) {
+        alert("⚠️ Cart is empty!");
+        return;
+    }
+    
     setIsProcessing(true);
-    // Simulate API Call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setCart([]);
-    setSelectedTable(null);
-    alert("✅ Order Sent to Kitchen!");
+    
+    try {
+      const result = await createOrder(selectedTable, cart, total);
+      
+      if (result.success) {
+        setCart([]);
+        setSelectedTable(null);
+        alert(`✅ Order #${result.orderId?.slice(0, 8)} sent to kitchen!`);
+      } else {
+        alert(`❌ Error: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert("❌ Failed to create order. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -165,7 +245,12 @@ export default function CashierDashboard() {
 
         {/* Menu Grid */}
         <div className="flex-1 overflow-y-auto px-8 pb-8">
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-gray-500">Loading menu...</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 <AnimatePresence>
                     {filteredItems.map((item) => (
                         <motion.div
@@ -193,7 +278,8 @@ export default function CashierDashboard() {
                         </motion.div>
                     ))}
                 </AnimatePresence>
-            </div>
+              </div>
+            )}
         </div>
       </main>
 
@@ -204,7 +290,10 @@ export default function CashierDashboard() {
         <div className="p-6 border-b border-white/5">
             <h2 className="text-sm uppercase tracking-wider text-gray-500 mb-3 font-semibold">Select Table</h2>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                {loading ? (
+                  <div className="text-gray-500 text-sm">Loading tables...</div>
+                ) : (
+                  tables.map((num) => (
                     <button
                         key={num}
                         onClick={() => setSelectedTable(num)}
@@ -215,7 +304,8 @@ export default function CashierDashboard() {
                     >
                         {num}
                     </button>
-                ))}
+                  ))
+                )}
             </div>
         </div>
 
