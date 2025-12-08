@@ -187,14 +187,27 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
         // Record successful order attempt
         recordTableAccess(tableId);
         
-        setShowSuccess(true);
         // Clear cart immediately
         setCart([]);
-        // Wait a bit for order to be committed, then fetch
+        
+        setShowSuccess(true);
+        // Wait for order to be committed, then fetch with retry logic
         setTimeout(() => {
           setShowSuccess(false);
+          // Call onOrderCreated with retry logic
           onOrderCreated();
-        }, 1500);
+          
+          // Retry fetching order if it doesn't appear immediately
+          let retries = 0;
+          const maxRetries = 5;
+          const retryInterval = setInterval(async () => {
+            retries++;
+            onOrderCreated();
+            if (retries >= maxRetries) {
+              clearInterval(retryInterval);
+            }
+          }, 1000);
+        }, 1000);
       } else if (result.error) {
         alert(`❌ Error: ${result.error}`);
       }

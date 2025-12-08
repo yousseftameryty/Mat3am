@@ -129,7 +129,19 @@ export default function CustomerTablePage() {
     }
   };
 
-  if (!mounted || loading) {
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while fetching order
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

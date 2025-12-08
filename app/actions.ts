@@ -146,6 +146,24 @@ export async function createOrder(
 export async function getOrderByTable(tableId: number) {
   const supabase = await createClient()
 
+  // First, ensure table exists
+  const { data: table } = await supabase
+    .from('restaurant_tables')
+    .select('id')
+    .eq('id', tableId)
+    .single()
+
+  if (!table) {
+    // Create table if it doesn't exist
+    await supabase
+      .from('restaurant_tables')
+      .insert({
+        id: tableId,
+        status: 'empty',
+        current_order_id: null
+      })
+  }
+
   const { data: order, error } = await supabase
     .from('orders')
     .select(`
@@ -165,6 +183,7 @@ export async function getOrderByTable(tableId: number) {
     .maybeSingle()
 
   if (error) {
+    console.error('Error fetching order:', error);
     return { success: false, error: error.message, data: null }
   }
 
