@@ -1,6 +1,5 @@
 "use client";
 
-// @ts-expect-error - react-qr-code types issue
 import QRCode from "react-qr-code";
 import { useState, useEffect } from "react";
 
