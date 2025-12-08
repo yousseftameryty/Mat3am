@@ -16,7 +16,8 @@ export function generateDeviceFingerprint(): string {
     new Date().getTimezoneOffset(),
     canvas.toDataURL(),
     navigator.hardwareConcurrency || 0,
-    navigator.deviceMemory || 0,
+    // @ts-expect-error - deviceMemory is experimental API not in TypeScript types
+    (navigator as any).deviceMemory || 0,
   ].join('|');
 
   // Simple hash function
