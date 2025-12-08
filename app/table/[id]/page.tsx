@@ -10,6 +10,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { getOrderByTable } from "@/app/actions";
 import MenuView from "./MenuView";
+import { recordTableAccess } from "@/utils/deviceFingerprint";
 
 type OrderItem = {
   id: number;
@@ -60,6 +61,8 @@ export default function CustomerTablePage() {
 
   useEffect(() => {
     setMounted(true);
+    // Record table access with device fingerprint
+    recordTableAccess(tableId);
     fetchOrder();
     
     // Set up real-time subscription for orders

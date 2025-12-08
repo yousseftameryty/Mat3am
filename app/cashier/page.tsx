@@ -166,7 +166,9 @@ export default function CashierDashboard() {
     setIsProcessing(true);
     
     try {
-      const result = await createOrder(selectedTable, cart, total);
+      // Cashier orders don't need validation (they're staff)
+      // Pass undefined for validationData to skip security checks
+      const result = await createOrder(selectedTable, cart, total, undefined);
       
       if (result.success) {
         setCart([]);

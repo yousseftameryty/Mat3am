@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { createOrder } from "@/app/actions";
+import { getDeviceFingerprint, getTableAccess, getRecentOrderAttempts, recordTableAccess } from "@/utils/deviceFingerprint";
 
 const CATEGORIES = [
   { id: "all", name: "All Items", icon: Grid3X3 },
@@ -68,6 +69,9 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
+    // Record table access when menu is viewed
+    recordTableAccess(tableId);
+    
     async function fetchMenu() {
       const supabase = createClient();
       const { data: items, error } = await supabase
@@ -88,7 +92,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
       setLoading(false);
     }
     fetchMenu();
-  }, []);
+  }, [tableId]);
 
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
