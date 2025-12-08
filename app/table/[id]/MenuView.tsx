@@ -188,10 +188,13 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
         recordTableAccess(tableId);
         
         setShowSuccess(true);
+        // Clear cart immediately
+        setCart([]);
+        // Wait a bit for order to be committed, then fetch
         setTimeout(() => {
           setShowSuccess(false);
           onOrderCreated();
-        }, 2000);
+        }, 1500);
       } else if (result.error) {
         alert(`❌ Error: ${result.error}`);
       }

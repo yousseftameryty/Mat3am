@@ -72,14 +72,17 @@ export default function CustomerTablePage() {
       .on(
         'postgres_changes' as any,
         {
-          event: 'UPDATE',
+          event: '*', // Listen to both INSERT and UPDATE
           schema: 'public',
           table: 'orders',
           filter: `table_id=eq.${tableId}`,
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (_payload: unknown) => {
-          fetchOrder();
+          // Small delay to ensure order is fully committed
+          setTimeout(() => {
+            fetchOrder();
+          }, 500);
         }
       )
       .subscribe();
