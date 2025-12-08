@@ -41,12 +41,17 @@ export default function CustomerTablePage() {
   const fetchOrder = useCallback(async () => {
     try {
       setLoading(true);
+      console.log(`Fetching order for table ${tableId}...`);
       const result = await getOrderByTable(tableId);
       
+      console.log('Order fetch result:', result);
+      
       if (result.success && result.data) {
+        console.log('Order found:', result.data.id, 'Status:', result.data.status);
         setOrder(result.data as Order);
         setError(null);
       } else {
+        console.log('No order found:', result.error);
         setError(result.error || "No active order found for this table");
         setOrder(null);
       }

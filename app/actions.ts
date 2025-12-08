@@ -164,7 +164,8 @@ export async function getOrderByTable(tableId: number) {
       })
   }
 
-  const { data: order, error } = await supabase
+  // Try to fetch order with order_items
+  const { data: order, error: orderError } = await supabase
     .from('orders')
     .select(`
       *,
@@ -182,9 +183,28 @@ export async function getOrderByTable(tableId: number) {
     .limit(1)
     .maybeSingle()
 
-  if (error) {
-    console.error('Error fetching order:', error);
-    return { success: false, error: error.message, data: null }
+  if (orderError) {
+    console.error('Error fetching order with items:', orderError);
+    // Try without order_items if that fails
+    const { data: simpleOrder, error: simpleError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('table_id', tableId)
+      .in('status', ['pending', 'cooking', 'ready', 'served', 'waiting_payment'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    
+    if (simpleError) {
+      return { success: false, error: simpleError.message, data: null }
+    }
+    
+    if (!simpleOrder) {
+      return { success: false, error: 'No active order found', data: null }
+    }
+    
+    // Return order without items if items query failed
+    return { success: true, data: { ...simpleOrder, order_items: [] } }
   }
 
   if (!order) {
