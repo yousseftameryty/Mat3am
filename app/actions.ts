@@ -26,7 +26,6 @@ export async function createOrder(
   // SECURITY VALIDATION - Prevent table manipulation
   if (validationData) {
     const TEN_MINUTES = 10 * 60 * 1000;
-    const TWO_MINUTES = 2 * 60 * 1000;
     const now = Date.now();
 
     // 1. Time-based validation: Must have accessed table page recently (within 10 minutes)

@@ -140,8 +140,27 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
     setShowConfirm2(false);
     
     try {
-      const result = await createOrder(tableId, cart, total);
+      // Gather validation data for security
+      const fingerprint = getDeviceFingerprint();
+      const tableAccess = getTableAccess(tableId);
+      const recentAttempts = getRecentOrderAttempts();
+      
+      // Count recent attempts for this device
+      const recentOrderAttempts = recentAttempts.filter(
+        (attempt) => attempt.fingerprint === fingerprint
+      ).length;
+
+      const validationData = {
+        deviceFingerprint: fingerprint,
+        tableAccessTimestamp: tableAccess?.timestamp || Date.now(),
+        recentOrderAttempts,
+      };
+
+      const result = await createOrder(tableId, cart, total, validationData);
       if (result.success) {
+        // Record successful order attempt
+        recordTableAccess(tableId);
+        
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
