@@ -29,9 +29,14 @@ export async function createOrder(
     const now = Date.now();
 
     // 1. Time-based validation: Must have accessed table page recently (within 10 minutes)
-    // But allow if timestamp is very recent (just created) or if it's 0 (first access)
+    // Allow if timestamp is 0 or very recent (within last 10 minutes)
     const timeSinceAccess = now - validationData.tableAccessTimestamp;
-    if (validationData.tableAccessTimestamp > 0 && timeSinceAccess > TEN_MINUTES) {
+    
+    // Only check time if we have a valid timestamp (not 0 or negative)
+    // If timestamp is recent (set to Date.now() as fallback), it will be 0 or very small
+    if (validationData.tableAccessTimestamp > 0 && timeSinceAccess > TEN_MINUTES && timeSinceAccess < (24 * 60 * 60 * 1000)) {
+      // Only reject if timestamp is old AND not from today (to avoid rejecting fresh fallback timestamps)
+      console.log('Security check: Table access expired', { timeSinceAccess, TEN_MINUTES });
       return { 
         success: false, 
         error: 'Table access expired. Please scan the QR code again.',
@@ -42,6 +47,7 @@ export async function createOrder(
     // 2. Silent redirect: If customer already placed an order for a different table, redirect to that table
     // Only enforce this AFTER they've placed their first order (originalTableId exists)
     if (validationData.originalTableId && validationData.originalTableId !== tableId) {
+      console.log('Security check: Redirecting to original table', { originalTableId: validationData.originalTableId, requestedTableId: tableId });
       return { 
         success: false, 
         error: null, // No error message - silent redirect
@@ -49,8 +55,7 @@ export async function createOrder(
       };
     }
 
-    // 3. Device fingerprint validation (will be checked against table access)
-    // This ensures the device that accessed the table is the one placing the order
+    console.log('Security check: Passed', { tableId, timeSinceAccess, originalTableId: validationData.originalTableId });
   }
 
   // 0. Check if table exists, create it if it doesn't

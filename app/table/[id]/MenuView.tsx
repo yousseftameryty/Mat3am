@@ -156,22 +156,27 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
         originalTableId: originalTable,
       };
       
-      console.log('Validation data:', {
+      console.log('[MenuView] Creating order with validation data:', {
         tableId,
         accessTimestamp,
         originalTable,
-        timeSinceAccess: Date.now() - accessTimestamp
+        timeSinceAccess: Date.now() - accessTimestamp,
+        cartItems: cart.length
       });
 
       const result = await createOrder(tableId, cart, total, validationData);
       
+      console.log('[MenuView] Order creation result:', result);
+      
       // Silent redirect if trying to order for different table
       if (!result.success && result.redirectToTable && result.redirectToTable !== tableId) {
+        console.log(`[MenuView] Redirecting to table ${result.redirectToTable}`);
         router.push(`/table/${result.redirectToTable}`);
         return;
       }
       
       if (result.success) {
+        console.log(`[MenuView] Order created successfully: ${result.orderId}`);
         // Lock customer to this table ONLY after successful order
         // Store as original table for future orders
         const fingerprint = getDeviceFingerprint();
