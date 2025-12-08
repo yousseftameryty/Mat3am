@@ -93,15 +93,33 @@ export async function getOrderByTable(tableId: number) {
 export async function updateOrderStatus(orderId: string, status: string) {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  // Update order status
+  const { data: order, error: orderError } = await supabase
     .from('orders')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', orderId)
+    .select('table_id')
+    .single()
 
-  if (error) {
-    return { success: false, error: error.message }
+  if (orderError) {
+    return { success: false, error: orderError.message }
+  }
+
+  // If marking as paid, reset the table to empty
+  if (status === 'paid' && order?.table_id) {
+    await supabase
+      .from('restaurant_tables')
+      .update({ 
+        status: 'empty', 
+        current_order_id: null 
+      })
+      .eq('id', order.table_id)
   }
 
   revalidatePath(`/table/${orderId}`)
+  revalidatePath('/cashier')
+  revalidatePath('/cashier/tables')
+  revalidatePath('/cashier/orders')
+  
   return { success: true }
 }

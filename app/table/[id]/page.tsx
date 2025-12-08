@@ -62,27 +62,47 @@ export default function CustomerTablePage() {
     setMounted(true);
     fetchOrder();
     
-      // Set up real-time subscription
-      const supabase = createClient();
-      const channel = supabase
-        .channel(`table-${tableId}`)
-        .on(
-          'postgres_changes' as any,
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-            filter: `table_id=eq.${tableId}`,
-          },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (_payload: unknown) => {
-            fetchOrder();
-          }
-        )
-        .subscribe();
+    // Set up real-time subscription for orders
+    const supabase = createClient();
+    const ordersChannel = supabase
+      .channel(`table-orders-${tableId}`)
+      .on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `table_id=eq.${tableId}`,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (_payload: unknown) => {
+          fetchOrder();
+        }
+      )
+      .subscribe();
+
+    // Also subscribe to table changes (for when table is reset)
+    const tablesChannel = supabase
+      .channel(`table-status-${tableId}`)
+      .on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'restaurant_tables',
+          filter: `id=eq.${tableId}`,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (_payload: unknown) => {
+          // If table is reset to empty, refresh order (will show menu)
+          fetchOrder();
+        }
+      )
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(tablesChannel);
     };
   }, [tableId, fetchOrder]);
 
