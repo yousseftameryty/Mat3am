@@ -147,11 +147,21 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
       const tableAccess = getTableAccess(tableId);
       const originalTable = getOriginalTable();
 
+      // Ensure we have a valid timestamp (use current time if not found)
+      const accessTimestamp = tableAccess?.timestamp || Date.now();
+
       const validationData = {
         deviceFingerprint: fingerprint,
-        tableAccessTimestamp: tableAccess?.timestamp || Date.now(),
+        tableAccessTimestamp: accessTimestamp,
         originalTableId: originalTable,
       };
+      
+      console.log('Validation data:', {
+        tableId,
+        accessTimestamp,
+        originalTable,
+        timeSinceAccess: Date.now() - accessTimestamp
+      });
 
       const result = await createOrder(tableId, cart, total, validationData);
       

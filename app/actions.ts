@@ -29,8 +29,9 @@ export async function createOrder(
     const now = Date.now();
 
     // 1. Time-based validation: Must have accessed table page recently (within 10 minutes)
+    // But allow if timestamp is very recent (just created) or if it's 0 (first access)
     const timeSinceAccess = now - validationData.tableAccessTimestamp;
-    if (timeSinceAccess > TEN_MINUTES) {
+    if (validationData.tableAccessTimestamp > 0 && timeSinceAccess > TEN_MINUTES) {
       return { 
         success: false, 
         error: 'Table access expired. Please scan the QR code again.',
@@ -39,7 +40,7 @@ export async function createOrder(
     }
 
     // 2. Silent redirect: If customer already placed an order for a different table, redirect to that table
-    // Only enforce this AFTER they've placed their first order
+    // Only enforce this AFTER they've placed their first order (originalTableId exists)
     if (validationData.originalTableId && validationData.originalTableId !== tableId) {
       return { 
         success: false, 
