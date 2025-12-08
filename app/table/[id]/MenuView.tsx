@@ -162,6 +162,28 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
       }
       
       if (result.success) {
+        // Lock customer to this table ONLY after successful order
+        // Store as original table for future orders
+        const fingerprint = getDeviceFingerprint();
+        const accessLog = JSON.parse(localStorage.getItem('order_access_log') || '[]');
+        
+        // Check if this is the first order (no original table set yet)
+        const hasOriginalTable = accessLog.length > 0 && accessLog[0]?.fingerprint === fingerprint;
+        
+        if (!hasOriginalTable) {
+          // Set this as the original table (prepend to log)
+          accessLog.unshift({
+            tableId,
+            fingerprint,
+            timestamp: Date.now(),
+          });
+          // Keep only last 10 entries
+          if (accessLog.length > 10) {
+            accessLog.pop();
+          }
+          localStorage.setItem('order_access_log', JSON.stringify(accessLog));
+        }
+        
         // Record successful order attempt
         recordTableAccess(tableId);
         

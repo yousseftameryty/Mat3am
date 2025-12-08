@@ -309,6 +309,7 @@ export default function CashierDashboard() {
         {/* Table Selector */}
         <div className="p-6 border-b border-white/5">
             <h2 className="text-sm uppercase tracking-wider text-gray-500 mb-3 font-semibold">Select Table</h2>
+            <p className="text-xs text-gray-600 mb-2">Cart data preserved when changing tables</p>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {loading ? (
                   <div className="text-gray-500 text-sm">Loading tables...</div>

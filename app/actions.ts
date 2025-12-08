@@ -38,7 +38,8 @@ export async function createOrder(
       };
     }
 
-    // 2. Silent redirect: If trying to order for different table, redirect to original
+    // 2. Silent redirect: If customer already placed an order for a different table, redirect to that table
+    // Only enforce this AFTER they've placed their first order
     if (validationData.originalTableId && validationData.originalTableId !== tableId) {
       return { 
         success: false, 
