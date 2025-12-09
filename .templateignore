@@ -1,0 +1,16 @@
+# Files to ignore when using this as a template
+# (These are already in .gitignore, but listed here for reference)
+
+node_modules/
+.next/
+.env.local
+.env*.local
+.vercel/
+*.log
+.DS_Store
+
+# When creating a new restaurant from template, you'll need to:
+# 1. Copy .env.example to .env.local and fill in new Supabase credentials
+# 2. Run npm install
+# 3. Run npm run dev
+
