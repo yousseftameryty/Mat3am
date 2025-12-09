@@ -46,6 +46,7 @@ type MenuItem = {
   name: string;
   price: number;
   category: string;
+  image_url?: string | null;
   emoji?: string;
   bg?: string;
 };
@@ -92,11 +93,12 @@ export default function CashierDashboard() {
       if (itemsError) {
         console.error('Error fetching menu items:', itemsError);
       } else {
-        const itemsWithEmoji = items.map((item: { id: number; name: string; price: string; category: string }, idx: number) => ({
+        const itemsWithEmoji = items.map((item: { id: number; name: string; price: string; category: string; image_url?: string | null }, idx: number) => ({
           ...item,
           price: parseFloat(item.price),
           emoji: EMOJI_MAP[item.category] || "🍽️",
           bg: BG_COLORS[idx % BG_COLORS.length],
+          image_url: item.image_url || null,
         }));
         setMenuItems(itemsWithEmoji);
       }
@@ -283,8 +285,25 @@ export default function CashierDashboard() {
                             onClick={() => addToCart(item)}
                             className="group relative bg-white border border-green-100 rounded-3xl p-4 cursor-pointer hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 shadow-sm"
                         >
-                            <div className={`h-32 w-full rounded-2xl mb-4 ${item.bg} flex items-center justify-center text-5xl shadow-inner group-hover:scale-105 transition-transform duration-300`}>
-                                {item.emoji}
+                            <div className={`h-32 w-full rounded-2xl mb-4 ${item.bg} flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-300 relative`}>
+                                {item.image_url ? (
+                                    <img 
+                                        src={item.image_url} 
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback to emoji if image fails to load
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            const parent = target.parentElement;
+                                            if (parent) {
+                                                parent.innerHTML = `<span class="text-5xl">${item.emoji}</span>`;
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <span className="text-5xl">{item.emoji}</span>
+                                )}
                             </div>
                             <div className="flex justify-between items-start">
                                 <div>

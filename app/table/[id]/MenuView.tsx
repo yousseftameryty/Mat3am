@@ -43,6 +43,7 @@ type MenuItem = {
   name: string;
   price: number;
   category: string;
+  image_url?: string | null;
   emoji?: string;
   bg?: string;
 };
@@ -88,6 +89,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
           price: parseFloat(item.price),
           emoji: EMOJI_MAP[item.category] || "🍽️",
           bg: BG_COLORS[idx % BG_COLORS.length],
+          image_url: item.image_url || null,
         }));
         setMenuItems(itemsWithEmoji);
       }
@@ -297,8 +299,25 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
               onClick={() => addToCart(item)}
               className="group bg-white border border-green-200 rounded-2xl p-4 cursor-pointer hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all shadow-sm"
             >
-              <div className={`h-24 w-full rounded-xl mb-3 ${item.bg} flex items-center justify-center text-4xl group-hover:scale-105 transition-transform`}>
-                {item.emoji}
+              <div className={`h-24 w-full rounded-xl mb-3 ${item.bg} flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform relative`}>
+                {item.image_url ? (
+                    <img 
+                        src={item.image_url} 
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            // Fallback to emoji if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                                parent.innerHTML = `<span class="text-4xl">${item.emoji}</span>`;
+                            }
+                        }}
+                    />
+                ) : (
+                    <span className="text-4xl">{item.emoji}</span>
+                )}
               </div>
               <h3 className="font-semibold text-sm mb-1 group-hover:text-green-600 transition-colors text-gray-900">{item.name}</h3>
               <p className="text-xs text-gray-500 mb-2 capitalize">{item.category}</p>
