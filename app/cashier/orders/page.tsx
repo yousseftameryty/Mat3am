@@ -107,19 +107,19 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
+            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
               Orders
             </h1>
-            <p className="text-gray-500">Manage and track all orders</p>
+            <p className="text-gray-600">Manage and track all orders</p>
           </div>
           <button
             onClick={() => router.push('/cashier')}
-            className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl transition-colors"
+            className="bg-white border border-green-200 hover:bg-green-50 hover:border-green-400 px-4 py-2 rounded-xl transition-colors shadow-sm text-gray-700"
           >
             Back to POS
           </button>
@@ -134,7 +134,7 @@ export default function OrdersPage() {
               placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-neutral-900 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-orange-500/50"
+              className="w-full bg-white border border-green-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-green-400 shadow-sm text-gray-900"
             />
           </div>
           <div className="flex gap-2">
@@ -142,10 +142,10 @@ export default function OrdersPage() {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-xl font-medium transition-all capitalize ${
+                className={`px-4 py-2 rounded-xl font-medium transition-all capitalize shadow-sm ${
                   filter === status
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-neutral-900 text-gray-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
+                    : 'bg-white border border-green-200 text-gray-600 hover:text-green-600 hover:border-green-400'
                 }`}
               >
                 {status}
@@ -157,7 +157,7 @@ export default function OrdersPage() {
         {/* Orders Grid */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -170,14 +170,14 @@ export default function OrdersPage() {
                   key={order.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-neutral-900/50 border border-white/10 rounded-2xl p-6 hover:border-orange-500/50 transition-all"
+                  className="bg-white border border-green-200 rounded-2xl p-6 hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all shadow-sm"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-xs text-gray-500 font-mono mb-1">
                         #{order.id.slice(0, 8).toUpperCase()}
                       </p>
-                      <p className="text-2xl font-bold">Table {order.table_id}</p>
+                      <p className="text-2xl font-bold text-gray-900">Table {order.table_id}</p>
                     </div>
                     <div className={`px-3 py-1 rounded-full border text-xs font-bold flex items-center gap-1.5 ${statusColors[order.status] || statusColors.pending}`}>
                       <StatusIcon size={12} />
@@ -187,12 +187,12 @@ export default function OrdersPage() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Items</span>
-                      <span className="font-medium">{itemCount}</span>
+                      <span className="text-gray-600">Items</span>
+                      <span className="font-medium text-gray-900">{itemCount}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Total</span>
-                      <span className="font-bold text-orange-400">
+                      <span className="text-gray-600">Total</span>
+                      <span className="font-bold text-green-600">
                         ${parseFloat(order.total_price.toString()).toFixed(2)}
                       </span>
                     </div>
@@ -207,7 +207,7 @@ export default function OrdersPage() {
                     {order.status === 'pending' && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, 'cooking')}
-                        className="flex-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+                        className="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-yellow-200"
                       >
                         Start Cooking
                       </button>
@@ -215,7 +215,7 @@ export default function OrdersPage() {
                     {order.status === 'cooking' && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, 'ready')}
-                        className="flex-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+                        className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-blue-200"
                       >
                         Mark Ready
                       </button>
@@ -223,7 +223,7 @@ export default function OrdersPage() {
                     {order.status === 'ready' && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, 'served')}
-                        className="flex-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+                        className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-green-200"
                       >
                         Mark Served
                       </button>
@@ -231,7 +231,7 @@ export default function OrdersPage() {
                     {order.status === 'served' && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, 'paid')}
-                        className="flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+                        className="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-purple-200"
                       >
                         Mark Paid
                       </button>
@@ -245,12 +245,14 @@ export default function OrdersPage() {
 
         {!loading && filteredOrders.length === 0 && (
           <div className="text-center py-16">
-            <ShoppingBag className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500">No orders found</p>
+            <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">No orders found</p>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+
 

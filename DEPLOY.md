@@ -83,3 +83,5 @@ Your app uses server actions and real-time subscriptions, so GitHub Pages won't 
 - Vercel uses global CDN, should be fast
 - Check Supabase connection (might be region issue)
 
+
+

@@ -158,3 +158,4 @@ If you add features that should be in the template:
 
 **Note**: This template is designed to be cloned and customized. Each restaurant instance should have its own Supabase project and deployment.
 
+

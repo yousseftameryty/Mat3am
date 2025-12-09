@@ -45,7 +45,7 @@ Once running, access the app from other devices using:
 
 The QR codes on `/admin/qr-code` will automatically use whatever URL you accessed the page from. So:
 
-1. Open http://YOUR_IP:3000/admin/qr-code on your computer
+1. Open http://192.168.8.106:3000/admin/qr-code on your computer
 2. The QR codes will point to http://YOUR_IP:3000/table/1, etc.
 3. Print or display these QR codes
 4. Phones can scan and access the table pages!
@@ -71,4 +71,6 @@ For production, deploy to:
 - Any hosting service
 
 Then update the BASE_URL in the QR code page to your production domain.
+
+
 
