@@ -136,10 +136,10 @@ export default function CustomerTablePage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-          <p className="text-gray-500">Loading...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -148,10 +148,10 @@ export default function CustomerTablePage() {
   // Show loading while fetching order
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] text-[#ededed] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-          <p className="text-gray-500">Loading your order...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+          <p className="text-gray-600">Loading your order...</p>
         </div>
       </div>
     );
@@ -163,15 +163,15 @@ export default function CustomerTablePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#ededed] font-sans pb-32 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 font-sans pb-32 overflow-x-hidden">
       
       {/* --- TOP NAV --- */}
       <div className="p-6 flex justify-between items-center z-50 relative">
         <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-xs font-mono uppercase tracking-widest text-gray-500">Live Connection</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-gray-600">Live Connection</span>
         </div>
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+        <div className="bg-white backdrop-blur-md border border-green-200 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm text-gray-900">
             Table #{tableId}
         </div>
       </div>
@@ -188,15 +188,15 @@ export default function CustomerTablePage() {
                     className="flex flex-col items-center"
                 >
                     <div className="relative">
-                        <div className="absolute -inset-4 bg-orange-500/20 rounded-full blur-xl animate-pulse"></div>
-                        <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center shadow-2xl shadow-orange-500/20 relative z-10">
+                        <div className="absolute -inset-4 bg-green-500/20 rounded-full blur-xl animate-pulse"></div>
+                        <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30 relative z-10">
                             <ChefHat className="text-white w-10 h-10 animate-bounce" />
                         </div>
                     </div>
-                    <h2 className="mt-6 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
+                    <h2 className="mt-6 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
                         {status === 'pending' ? 'Order Received' : 'Kitchen is Cooking'}
                     </h2>
-                    <p className="text-gray-500 text-sm mt-1">Estimated time: 12 mins</p>
+                    <p className="text-gray-600 text-sm mt-1">Estimated time: 12 mins</p>
                 </motion.div>
             )}
 
@@ -210,8 +210,8 @@ export default function CustomerTablePage() {
                     <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/20">
                         <CheckCircle2 className="text-white w-10 h-10" />
                     </div>
-                    <h2 className="mt-6 text-2xl font-bold text-white">Order Ready</h2>
-                    <p className="text-gray-500 text-sm mt-1">Your order is ready!</p>
+                    <h2 className="mt-6 text-2xl font-bold text-gray-900">Order Ready</h2>
+                    <p className="text-gray-600 text-sm mt-1">Your order is ready!</p>
                 </motion.div>
             )}
 
@@ -222,11 +222,11 @@ export default function CustomerTablePage() {
                     animate={{ scale: 1, opacity: 1 }}
                     className="flex flex-col items-center"
                 >
-                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/20">
+                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30">
                         <Utensils className="text-white w-10 h-10" />
                     </div>
-                    <h2 className="mt-6 text-2xl font-bold text-white">Order Served</h2>
-                    <p className="text-gray-500 text-sm mt-1">Enjoy your meal!</p>
+                    <h2 className="mt-6 text-2xl font-bold text-gray-900">Order Served</h2>
+                    <p className="text-gray-600 text-sm mt-1">Enjoy your meal!</p>
                 </motion.div>
             )}
 
@@ -240,8 +240,8 @@ export default function CustomerTablePage() {
                     <div className="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-2xl shadow-yellow-500/20">
                         <CreditCard className="text-white w-10 h-10" />
                     </div>
-                    <h2 className="mt-6 text-2xl font-bold text-white">Waiting for Waiter</h2>
-                    <p className="text-gray-500 text-sm mt-1">Waiter will arrive with POS machine shortly</p>
+                    <h2 className="mt-6 text-2xl font-bold text-gray-900">Waiting for Waiter</h2>
+                    <p className="text-gray-600 text-sm mt-1">Waiter will arrive with POS machine shortly</p>
                 </motion.div>
             )}
 
@@ -255,8 +255,8 @@ export default function CustomerTablePage() {
                     <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/20">
                         <Receipt className="text-white w-10 h-10" />
                     </div>
-                    <h2 className="mt-6 text-2xl font-bold text-white">Payment Complete</h2>
-                    <p className="text-gray-500 text-sm mt-1">Thank you for dining with us!</p>
+                    <h2 className="mt-6 text-2xl font-bold text-gray-900">Payment Complete</h2>
+                    <p className="text-gray-600 text-sm mt-1">Thank you for dining with us!</p>
                 </motion.div>
             )}
         </AnimatePresence>
@@ -275,10 +275,10 @@ export default function CustomerTablePage() {
         >
             <div className="p-6 pb-10 flex flex-col items-center">
                 {/* Logo */}
-                <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mb-4">
-                    <span className="text-white font-bold text-xl">M</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-green-500/30 p-2">
+                    <img src="/HKLOGO.png" alt="Hazara Kabab" className="w-full h-full object-contain" />
                 </div>
-                <h3 className="text-2xl font-black tracking-tighter uppercase mb-1">The Restaurant</h3>
+                <h3 className="text-2xl font-black tracking-tighter uppercase mb-1">Hazara Kabab</h3>
                 <p className="text-xs text-gray-500 font-mono mb-6">Order ID: #{order.id.slice(0, 8).toUpperCase()} • {new Date(order.created_at).toLocaleTimeString()}</p>
 
                 <div className="w-full border-b-2 border-dashed border-gray-300 mb-6"></div>
@@ -355,15 +355,15 @@ export default function CustomerTablePage() {
           initial={{ y: 100 }}
           animate={{ y: 0 }}
           transition={{ delay: 2, type: 'spring' }}
-          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40"
+          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white via-green-50/95 to-transparent z-40 shadow-2xl"
         >
           <div className="flex gap-3 max-w-md mx-auto">
-              <button className="flex-1 bg-neutral-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+              <button className="flex-1 bg-white border border-green-200 text-gray-700 py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-green-50 shadow-sm">
                   <MessageSquare size={18} /> Call Waiter
               </button>
               <button 
                 onClick={handleRequestPayment}
-                className="flex-[2] bg-white text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-white/10 active:scale-95 transition-transform hover:bg-gray-100"
+                className="flex-[2] bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-500/30 active:scale-95 transition-transform hover:from-green-600 hover:to-emerald-700"
               >
                   <CreditCard size={18} /> Pay ${finalTotal.toFixed(2)}
               </button>
@@ -376,10 +376,10 @@ export default function CustomerTablePage() {
           initial={{ y: 100 }}
           animate={{ y: 0 }}
           transition={{ delay: 2, type: 'spring' }}
-          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-40"
+          className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-white via-green-50/95 to-transparent z-40 shadow-2xl"
         >
           <div className="flex gap-3 max-w-md mx-auto">
-              <button className="flex-1 bg-neutral-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+              <button className="flex-1 bg-white border border-green-200 text-gray-700 py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-green-50 shadow-sm">
                   <MessageSquare size={18} /> Call Waiter
               </button>
           </div>

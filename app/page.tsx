@@ -8,8 +8,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Logo/Header */}
           <div className="mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl mb-6 shadow-lg shadow-green-500/30">
-              <ChefHat className="w-10 h-10 text-white" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl mb-6 shadow-lg shadow-green-500/30 p-3">
+              <img src="/HKLOGO.png" alt="Hazara Kabab" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
               Hazara Kabab

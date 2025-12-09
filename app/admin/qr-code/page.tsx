@@ -53,7 +53,7 @@ export default function QRPrintPage() {
           <div className={`border rounded-lg p-3 text-sm ${
             baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')
               ? 'bg-yellow-50 border-yellow-200'
-              : 'bg-blue-50 border-blue-200'
+              : 'bg-green-50 border-green-200'
           }`}>
             {baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') ? (
               <>
@@ -66,9 +66,9 @@ export default function QRPrintPage() {
               </>
             ) : (
               <>
-                <p className="font-semibold text-blue-900 mb-1">✅ Network URL Active:</p>
-                <p className="text-blue-700 font-mono break-all">{baseUrl}</p>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="font-semibold text-green-900 mb-1">✅ Network URL Active:</p>
+                <p className="text-green-700 font-mono break-all">{baseUrl}</p>
+                <p className="text-xs text-green-600 mt-1">
                   QR codes will work on all devices on your network!
                 </p>
               </>
@@ -77,7 +77,7 @@ export default function QRPrintPage() {
         </div>
         <button 
           onClick={() => window.print()}
-          className="bg-black text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-800"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/30"
         >
           Print Stickers
         </button>

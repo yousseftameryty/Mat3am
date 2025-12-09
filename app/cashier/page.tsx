@@ -191,7 +191,7 @@ export default function CashierDashboard() {
       {/* --- LEFT SIDEBAR (Navigation) --- */}
       <nav className="w-20 flex flex-col items-center py-8 border-r border-green-200/50 bg-white/80 backdrop-blur-md z-20 shadow-sm">
         <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-xl mb-10 shadow-lg shadow-green-500/30">
-            <ChefHat size={28} className="text-white" />
+            <img src="/HKLOGO.png" alt="Hazara Kabab" className="w-7 h-7 object-contain" />
         </div>
         
         <div className="flex flex-col gap-6 w-full px-4">

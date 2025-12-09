@@ -76,27 +76,27 @@ export default function TablesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
+            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
               Tables
             </h1>
-            <p className="text-gray-500">Monitor table status and orders</p>
+            <p className="text-gray-600">Monitor table status and orders</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={fetchTables}
-              className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="bg-white border border-green-200 hover:bg-green-50 hover:border-green-400 px-4 py-2 rounded-xl transition-colors flex items-center gap-2 shadow-sm text-gray-700"
             >
               <RefreshCw size={18} />
               Refresh
             </button>
             <button
               onClick={() => router.push('/cashier')}
-              className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="bg-white border border-green-200 hover:bg-green-50 hover:border-green-400 px-4 py-2 rounded-xl transition-colors flex items-center gap-2 shadow-sm text-gray-700"
             >
               <ArrowLeft size={18} />
               Back to POS
@@ -107,7 +107,7 @@ export default function TablesPage() {
         {/* Tables Grid */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -122,23 +122,23 @@ export default function TablesPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   onClick={() => order && router.push(`/table/${table.id}`)}
-                  className={`bg-neutral-900/50 border rounded-2xl p-6 cursor-pointer hover:border-orange-500/50 transition-all ${
-                    order ? 'border-white/10' : 'border-white/5'
+                  className={`bg-white border rounded-2xl p-6 cursor-pointer hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all shadow-sm ${
+                    order ? 'border-green-300' : 'border-green-200'
                   }`}
                 >
                   <div className="flex flex-col items-center text-center">
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${config.color.replace('border', 'bg').replace('/50', '/20')}`}>
                       <StatusIcon size={24} />
                     </div>
-                    <h3 className="text-2xl font-bold mb-1">Table {table.id}</h3>
+                    <h3 className="text-2xl font-bold mb-1 text-gray-900">Table {table.id}</h3>
                     <p className={`text-xs px-3 py-1 rounded-full border ${config.color} mb-3`}>
                       {config.label}
                     </p>
                     
                     {order && (
-                      <div className="w-full mt-3 pt-3 border-t border-white/10 space-y-1">
+                      <div className="w-full mt-3 pt-3 border-t border-green-200 space-y-1">
                         <p className="text-xs text-gray-500">Order #{order.id.slice(0, 6)}</p>
-                        <p className="text-sm font-bold text-orange-400">
+                        <p className="text-sm font-bold text-green-600">
                           ${parseFloat(order.total_price.toString()).toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500 capitalize">{order.status}</p>

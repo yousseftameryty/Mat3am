@@ -34,19 +34,19 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-white via-green-50/30 to-white text-gray-900 p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
+            <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
               Settings
             </h1>
-            <p className="text-gray-500">Configure your restaurant system</p>
+            <p className="text-gray-600">Configure your restaurant system</p>
           </div>
           <button
             onClick={() => router.push('/cashier')}
-            className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+            className="bg-white border border-green-200 hover:bg-green-50 hover:border-green-400 px-4 py-2 rounded-xl transition-colors flex items-center gap-2 shadow-sm text-gray-700"
           >
             <ArrowLeft size={18} />
             Back to POS
@@ -59,40 +59,40 @@ export default function SettingsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-neutral-900/50 border border-white/10 rounded-2xl p-6"
+            className="bg-white border border-green-200 rounded-2xl p-6 shadow-sm"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                <CreditCard className="text-orange-400" size={20} />
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <CreditCard className="text-green-600" size={20} />
               </div>
-              <h2 className="text-xl font-bold">Billing Settings</h2>
+              <h2 className="text-xl font-bold text-gray-900">Billing Settings</h2>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Tax Rate (%)</label>
+                <label className="block text-sm text-gray-700 mb-2">Tax Rate (%)</label>
                 <input
                   type="number"
                   value={settings.taxRate}
                   onChange={(e) => setSettings({ ...settings, taxRate: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-neutral-800 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500/50"
+                  className="w-full bg-white border border-green-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-400 text-gray-900 shadow-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Service Charge (%)</label>
+                <label className="block text-sm text-gray-700 mb-2">Service Charge (%)</label>
                 <input
                   type="number"
                   value={settings.serviceCharge}
                   onChange={(e) => setSettings({ ...settings, serviceCharge: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-neutral-800 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500/50"
+                  className="w-full bg-white border border-green-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-400 text-gray-900 shadow-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Currency</label>
+                <label className="block text-sm text-gray-700 mb-2">Currency</label>
                 <select
                   value={settings.currency}
                   onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-                  className="w-full bg-neutral-800 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500/50"
+                  className="w-full bg-white border border-green-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-400 text-gray-900 shadow-sm"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -107,37 +107,37 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-neutral-900/50 border border-white/10 rounded-2xl p-6"
+            className="bg-white border border-green-200 rounded-2xl p-6 shadow-sm"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Bell className="text-blue-400" size={20} />
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <Bell className="text-green-600" size={20} />
               </div>
-              <h2 className="text-xl font-bold">Notifications</h2>
+              <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
             </div>
             
             <div className="space-y-4">
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm">Enable Notifications</span>
+                <span className="text-sm text-gray-700">Enable Notifications</span>
                 <input
                   type="checkbox"
                   checked={settings.notifications}
                   onChange={(e) => setSettings({ ...settings, notifications: e.target.checked })}
-                  className="w-12 h-6 bg-neutral-800 rounded-full appearance-none relative cursor-pointer checked:bg-orange-500 transition-colors"
+                  className="w-12 h-6 bg-gray-200 rounded-full appearance-none relative cursor-pointer checked:bg-green-500 transition-colors"
                   style={{
-                    background: settings.notifications ? '#f97316' : '#262626',
+                    background: settings.notifications ? '#10b981' : '#e5e7eb',
                   }}
                 />
               </label>
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm">Sound Effects</span>
+                <span className="text-sm text-gray-700">Sound Effects</span>
                 <input
                   type="checkbox"
                   checked={settings.soundEnabled}
                   onChange={(e) => setSettings({ ...settings, soundEnabled: e.target.checked })}
-                  className="w-12 h-6 bg-neutral-800 rounded-full appearance-none relative cursor-pointer checked:bg-orange-500 transition-colors"
+                  className="w-12 h-6 bg-gray-200 rounded-full appearance-none relative cursor-pointer checked:bg-green-500 transition-colors"
                   style={{
-                    background: settings.soundEnabled ? '#f97316' : '#262626',
+                    background: settings.soundEnabled ? '#10b981' : '#e5e7eb',
                   }}
                 />
               </label>
@@ -150,10 +150,10 @@ export default function SettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             onClick={handleSave}
-            className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${
+            className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
               saved
                 ? 'bg-green-500 text-white'
-                : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700'
+                : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-green-500/30'
             }`}
           >
             {saved ? (
