@@ -285,7 +285,7 @@ export default function CashierDashboard() {
                             onClick={() => addToCart(item)}
                             className="group relative bg-white border border-green-100 rounded-3xl p-4 cursor-pointer hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 shadow-sm"
                         >
-                            <div className={`h-32 w-full rounded-2xl mb-4 ${item.bg} flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-300 relative`}>
+                            <div className={`aspect-square w-full rounded-2xl mb-4 ${item.bg} flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-300 relative`}>
                                 {item.image_url ? (
                                     <img 
                                         src={item.image_url} 

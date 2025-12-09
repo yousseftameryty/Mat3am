@@ -299,7 +299,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
               onClick={() => addToCart(item)}
               className="group bg-white border border-green-200 rounded-2xl p-4 cursor-pointer hover:border-green-400 hover:shadow-lg hover:shadow-green-500/10 transition-all shadow-sm"
             >
-              <div className={`h-24 w-full rounded-xl mb-3 ${item.bg} flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform relative`}>
+              <div className={`aspect-square w-full rounded-xl mb-3 ${item.bg} flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform relative`}>
                 {item.image_url ? (
                     <img 
                         src={item.image_url} 
