@@ -36,13 +36,27 @@ export default function LoginPage() {
 
       if (data.user) {
         // Get user profile to determine role
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, is_active')
           .eq('id', data.user.id)
           .single()
 
-        if (!profile || !profile.is_active) {
+        if (profileError) {
+          console.error('Profile fetch error:', profileError)
+          setError(`Error loading profile: ${profileError.message}`)
+          setLoading(false)
+          return
+        }
+
+        if (!profile) {
+          setError('Profile not found. Please contact administrator.')
+          await supabase.auth.signOut()
+          setLoading(false)
+          return
+        }
+
+        if (!profile.is_active) {
           setError('Account is inactive. Please contact administrator.')
           await supabase.auth.signOut()
           setLoading(false)
