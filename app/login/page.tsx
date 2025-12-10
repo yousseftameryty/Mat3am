@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { getRoleRedirectPath } from '@/utils/auth-types'
@@ -17,6 +17,32 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Check if already logged in on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          // Already logged in, check profile and redirect
+          const profileResult = await checkProfileStatus(session.user.id)
+          if (profileResult.success && profileResult.profile?.is_active) {
+            const redirectPath = getRoleRedirectPath(profileResult.profile.role as any)
+            window.location.href = redirectPath
+          } else {
+            // Invalid session, sign out
+            await supabase.auth.signOut()
+          }
+        }
+      } catch (err) {
+        // Ignore errors during session check
+        console.error('Session check error:', err)
+      }
+    }
+    checkSession()
+  }, [])
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -24,6 +50,10 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
+      
+      // Clear any existing session first
+      await supabase.auth.signOut()
+      
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -36,6 +66,9 @@ export default function LoginPage() {
       }
 
       if (data.user) {
+        // Wait a moment for session to be saved
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Get user profile to determine role (using server action to bypass RLS issues)
         const profileResult = await checkProfileStatus(data.user.id)
 
@@ -53,12 +86,19 @@ export default function LoginPage() {
           return
         }
 
-        // Redirect based on role
+        // Redirect based on role - use window.location for more reliable redirect
         const redirectPath = getRoleRedirectPath(profileResult.profile.role as any)
-        router.push(redirectPath)
-        router.refresh()
+        setLoading(false) // Stop loading before redirect
+        
+        // Small delay to ensure session is saved
+        setTimeout(() => {
+          window.location.href = redirectPath
+        }, 100)
+      } else {
+        setLoading(false)
       }
     } catch (err: any) {
+      console.error('Login error:', err)
       setError(err.message || 'An error occurred during login')
       setLoading(false)
     }
@@ -103,10 +143,13 @@ export default function LoginPage() {
         return
       }
 
-      // Refresh and redirect
+      // Wait a moment for session to be saved
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Refresh and redirect - use window.location for more reliable redirect
       const redirectPath = getRoleRedirectPath(profile.role as any)
-      router.push(redirectPath)
-      router.refresh()
+      setLoading(false) // Stop loading before redirect
+      window.location.href = redirectPath
     } catch (err: any) {
       setError(err.message || 'An error occurred during PIN login')
       setLoading(false)
