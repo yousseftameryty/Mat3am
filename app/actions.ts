@@ -2,6 +2,8 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
+import { getUserProfile } from '@/utils/auth'
 
 type CartItem = {
   id: number;
@@ -106,13 +108,21 @@ export async function createOrder(
     }
   }
 
+  // Get current user for tracking
+  const profile = await getUserProfile()
+  const headersList = await headers()
+  const ipAddress = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown'
+  const userAgent = headersList.get('user-agent') || 'unknown'
+
   // 1. Create the Order
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       table_id: tableId,
       total_price: total,
-      status: 'pending'
+      status: 'pending',
+      created_by: profile?.id || null,
+      order_started_at: new Date().toISOString()
     })
     .select()
     .single()
@@ -146,7 +156,20 @@ export async function createOrder(
     .update({ status: 'occupied', current_order_id: order.id })
     .eq('id', tableId)
 
-  // 4. Refresh Data
+  // 4. Log audit event
+  if (profile) {
+    await supabase.rpc('log_audit_event', {
+      p_actor_id: profile.id,
+      p_action: `Created Order #${order.id.slice(0, 8)} for Table ${tableId}`,
+      p_entity_type: 'order',
+      p_entity_id: order.id,
+      p_changes: JSON.stringify({ order_id: order.id, table_id: tableId, total_price: total }),
+      p_ip_address: ipAddress,
+      p_user_agent: userAgent
+    })
+  }
+
+  // 5. Refresh Data
   revalidatePath('/cashier')
   
   return { success: true, orderId: order.id, redirectToTable: null }
@@ -233,11 +256,42 @@ export async function getOrderByTable(tableId: number) {
 
 export async function updateOrderStatus(orderId: string, status: string) {
   const supabase = await createClient()
+  const profile = await getUserProfile()
+  const headersList = await headers()
+  const ipAddress = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown'
+  const userAgent = headersList.get('user-agent') || 'unknown'
+  const now = new Date().toISOString()
+
+  // Get current order to track status changes
+  const { data: currentOrder } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
+    .single()
+
+  // Prepare update data with timestamps
+  const updateData: any = {
+    status,
+    updated_at: now
+  }
+
+  // Update timestamps based on status
+  if (status === 'cooking' && !currentOrder?.kitchen_received_at) {
+    updateData.kitchen_received_at = now
+  } else if (status === 'ready' && !currentOrder?.ready_at) {
+    updateData.ready_at = now
+  } else if (status === 'served' && !currentOrder?.served_at) {
+    updateData.served_at = now
+  } else if (status === 'paid') {
+    updateData.paid_at = now
+    updateData.completed_at = now
+    updateData.paid_by = profile?.id || null
+  }
 
   // Update order status
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(updateData)
     .eq('id', orderId)
     .select('table_id')
     .single()
@@ -257,9 +311,87 @@ export async function updateOrderStatus(orderId: string, status: string) {
       .eq('id', order.table_id)
   }
 
+  // Log audit event
+  if (profile) {
+    await supabase.rpc('log_audit_event', {
+      p_actor_id: profile.id,
+      p_action: `Updated Order #${orderId.slice(0, 8)} status to ${status}`,
+      p_entity_type: 'order',
+      p_entity_id: orderId,
+      p_changes: JSON.stringify({ old_status: currentOrder?.status, new_status: status }),
+      p_ip_address: ipAddress,
+      p_user_agent: userAgent
+    })
+  }
+
   revalidatePath(`/table/${orderId}`)
   revalidatePath('/cashier')
   revalidatePath('/cashier/tables')
+  revalidatePath('/cashier/orders')
+  
+  return { success: true }
+}
+
+export async function voidOrderItem(itemId: number, reason: string) {
+  const supabase = await createClient()
+  const profile = await getUserProfile()
+  const headersList = await headers()
+  const ipAddress = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown'
+  const userAgent = headersList.get('user-agent') || 'unknown'
+
+  if (!profile) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Get the order item and check if order is in a state that allows voiding
+  const { data: orderItem, error: itemError } = await supabase
+    .from('order_items')
+    .select(`
+      *,
+      orders!inner (
+        id,
+        status
+      )
+    `)
+    .eq('id', itemId)
+    .single()
+
+  if (itemError || !orderItem) {
+    return { success: false, error: 'Order item not found' }
+  }
+
+  // Check if order status allows voiding (cashiers can't void after cooking)
+  const orderStatus = (orderItem as any).orders.status
+  if (profile.role === 'cashier' && ['cooking', 'ready', 'served', 'paid'].includes(orderStatus)) {
+    return { success: false, error: 'Cannot void items after order is cooking' }
+  }
+
+  // Void the item
+  const { error: updateError } = await supabase
+    .from('order_items')
+    .update({
+      voided_at: new Date().toISOString(),
+      voided_by: profile.id,
+      void_reason: reason
+    })
+    .eq('id', itemId)
+
+  if (updateError) {
+    return { success: false, error: updateError.message }
+  }
+
+  // Log audit event
+  await supabase.rpc('log_audit_event', {
+    p_actor_id: profile.id,
+    p_action: `Voided Order Item #${itemId}`,
+    p_entity_type: 'order_item',
+    p_entity_id: itemId.toString(),
+    p_changes: JSON.stringify({ reason }),
+    p_ip_address: ipAddress,
+    p_user_agent: userAgent
+  })
+
+  revalidatePath('/cashier')
   revalidatePath('/cashier/orders')
   
   return { success: true }
