@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { getUserProfile } from '@/utils/auth'
 import MyTablesClient from './MyTablesClient'
+import AvailableTablesWrapper from './AvailableTablesWrapper'
 
 export default async function WaiterPage() {
   const supabase = await createClient()
@@ -44,6 +45,7 @@ export default async function WaiterPage() {
         <h1 className="text-2xl font-black text-gray-900 mb-1">My Tables</h1>
         <p className="text-gray-600 text-sm">Manage your assigned tables</p>
       </div>
+      <AvailableTablesWrapper waiterId={profile.id} />
       <MyTablesClient assignments={transformedAssignments} />
     </div>
   )

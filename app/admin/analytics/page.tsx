@@ -21,14 +21,79 @@ export default async function AnalyticsPage() {
     .from('table_analytics')
     .select('*')
 
-  // Get revenue by hour for today
+  // Get comprehensive analytics data
   const today = new Date()
   const startOfDay = new Date(today.setHours(0, 0, 0, 0))
+  const startOfWeek = new Date(today.setDate(today.getDate() - 7))
+  const startOfMonth = new Date(today.setMonth(today.getMonth() - 1))
+
+  // Today's orders (all statuses for comprehensive tracking)
   const { data: todayOrders } = await supabase
     .from('orders')
-    .select('total_price, created_at, status')
+    .select('total_price, created_at, status, table_id, paid_at, paid_by')
     .gte('created_at', startOfDay.toISOString())
-    .eq('status', 'paid')
+
+  // Menu item performance
+  const { data: menuItemPerformance } = await supabase
+    .from('order_items')
+    .select(`
+      quantity,
+      price_at_time,
+      menu_items (
+        id,
+        name,
+        category,
+        price
+      ),
+      orders!inner (
+        created_at,
+        status,
+        total_price
+      )
+    `)
+    .gte('orders.created_at', startOfWeek.toISOString())
+    .eq('orders.status', 'paid')
+
+  // Category performance
+  const { data: categoryPerformance } = await supabase
+    .from('order_items')
+    .select(`
+      quantity,
+      price_at_time,
+      menu_items!inner (
+        category
+      ),
+      orders!inner (
+        created_at,
+        status
+      )
+    `)
+    .gte('orders.created_at', startOfWeek.toISOString())
+    .eq('orders.status', 'paid')
+
+  // All orders for comprehensive analytics
+  const { data: allOrders } = await supabase
+    .from('orders')
+    .select('*')
+    .gte('created_at', startOfMonth.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(5000)
+
+  // Employee activity
+  const { data: employeeActivity } = await supabase
+    .from('audit_logs')
+    .select(`
+      actor_id,
+      action,
+      timestamp,
+      profiles!inner (
+        full_name,
+        role
+      )
+    `)
+    .gte('timestamp', startOfDay.toISOString())
+    .order('timestamp', { ascending: false })
+    .limit(1000)
 
   return (
     <div className="space-y-6">
@@ -41,6 +106,10 @@ export default async function AnalyticsPage() {
         employeePerformance={employeePerformance || []}
         tableAnalytics={tableAnalytics || []}
         todayOrders={todayOrders || []}
+        menuItemPerformance={menuItemPerformance || []}
+        categoryPerformance={categoryPerformance || []}
+        allOrders={allOrders || []}
+        employeeActivity={employeeActivity || []}
       />
     </div>
   )

@@ -54,6 +54,11 @@ export default function KitchenDisplayClient({ initialOrders }: KitchenDisplayCl
           filter: `status=in.(pending,cooking)`,
         },
         (payload) => {
+          // Play sound immediately on new order INSERT
+          if (soundEnabled && payload.eventType === 'INSERT') {
+            playNotificationSound()
+          }
+          
           // Refetch orders
           supabase
             .from('orders')
@@ -76,8 +81,8 @@ export default function KitchenDisplayClient({ initialOrders }: KitchenDisplayCl
             .order('created_at', { ascending: true })
             .then(({ data }) => {
               if (data) {
-                // Play sound if new order added
-                if (soundEnabled && data.length > lastOrderCount) {
+                // Play sound if new order added (backup check)
+                if (soundEnabled && data.length > lastOrderCount && payload.eventType === 'INSERT') {
                   playNotificationSound()
                 }
                 setOrders(data)
@@ -94,19 +99,33 @@ export default function KitchenDisplayClient({ initialOrders }: KitchenDisplayCl
   }, [soundEnabled, lastOrderCount])
 
   const playNotificationSound = () => {
-    const audio = new Audio('/notification.mp3')
-    audio.play().catch(() => {
-      // Fallback: use Web Audio API
-      const context = new AudioContext()
+    // McDonald's-style order notification sound
+    const context = new AudioContext()
+    
+    // Create a pleasant "ding" sound sequence
+    const playTone = (frequency: number, startTime: number, duration: number) => {
       const oscillator = context.createOscillator()
       const gainNode = context.createGain()
+      
+      oscillator.type = 'sine'
+      oscillator.frequency.value = frequency
+      
+      gainNode.gain.setValueAtTime(0, startTime)
+      gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+      
       oscillator.connect(gainNode)
       gainNode.connect(context.destination)
-      oscillator.frequency.value = 800
-      gainNode.gain.value = 0.3
-      oscillator.start()
-      oscillator.stop(context.currentTime + 0.2)
-    })
+      
+      oscillator.start(startTime)
+      oscillator.stop(startTime + duration)
+    }
+    
+    // Play three tones: high, medium, high (like McDonald's)
+    const now = context.currentTime
+    playTone(800, now, 0.15)
+    playTone(600, now + 0.1, 0.15)
+    playTone(900, now + 0.2, 0.2)
   }
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {

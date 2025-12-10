@@ -69,7 +69,8 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
       }
     } else if (pathname.startsWith('/cashier')) {
-      if (!['admin', 'cashier'].includes(userRole)) {
+      // Cashier routes: ONLY cashier role (admin can override)
+      if (userRole !== 'cashier' && userRole !== 'admin') {
         const url = request.nextUrl.clone()
         url.pathname = '/unauthorized'
         return NextResponse.redirect(url)

@@ -46,6 +46,10 @@ interface AnalyticsClientProps {
   employeePerformance: EmployeePerformance[]
   tableAnalytics: TableAnalytics[]
   todayOrders: any[]
+  menuItemPerformance: any[]
+  categoryPerformance: any[]
+  allOrders: any[]
+  employeeActivity: any[]
 }
 
 export default function AnalyticsClient({
@@ -53,6 +57,10 @@ export default function AnalyticsClient({
   employeePerformance,
   tableAnalytics,
   todayOrders,
+  menuItemPerformance,
+  categoryPerformance,
+  allOrders,
+  employeeActivity,
 }: AnalyticsClientProps) {
   const [activeTab, setActiveTab] = useState<'orders' | 'employees' | 'tables' | 'revenue'>('orders')
 
