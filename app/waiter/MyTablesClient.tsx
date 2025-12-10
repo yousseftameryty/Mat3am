@@ -17,7 +17,7 @@ interface TableAssignment {
       total_price: number
       created_at: string
     } | null
-  }
+  } | null
 }
 
 interface MyTablesClientProps {
@@ -57,6 +57,7 @@ export default function MyTablesClient({ assignments }: MyTablesClientProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {assignments.map((assignment) => {
         const table = assignment.restaurant_tables
+        if (!table) return null
         const order = table.orders
 
         return (

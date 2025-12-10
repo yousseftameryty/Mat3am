@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { UserRole } from '@/utils/auth'
+import type { UserRole } from '@/utils/auth-types'
 import { Plus, Edit, Trash2, UserCheck, UserX, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 

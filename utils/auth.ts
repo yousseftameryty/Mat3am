@@ -1,15 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import type { UserRole, UserProfile } from './auth-types'
 
-export type UserRole = 'admin' | 'cashier' | 'waiter' | 'kitchen'
-
-export interface UserProfile {
-  id: string
-  full_name: string
-  role: UserRole
-  pin_code: number | null
-  is_active: boolean
-}
+// Re-export types for convenience
+export type { UserRole, UserProfile }
 
 /**
  * Get the current authenticated user
@@ -127,16 +121,3 @@ export async function checkPermission(
   return resourcePermissions.includes(action) || resourcePermissions.includes('*')
 }
 
-/**
- * Get redirect path based on user role
- */
-export function getRoleRedirectPath(role: UserRole): string {
-  const paths: Record<UserRole, string> = {
-    admin: '/admin',
-    cashier: '/cashier',
-    waiter: '/waiter',
-    kitchen: '/kitchen'
-  }
-  
-  return paths[role] || '/login'
-}

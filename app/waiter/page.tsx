@@ -30,13 +30,21 @@ export default async function WaiterPage() {
     .eq('waiter_id', profile.id)
     .is('unassigned_at', null)
 
+  // Transform the data to match the expected type
+  const transformedAssignments = (assignments || []).map((assignment: any) => ({
+    table_id: assignment.table_id,
+    restaurant_tables: Array.isArray(assignment.restaurant_tables) 
+      ? assignment.restaurant_tables[0] 
+      : assignment.restaurant_tables
+  }))
+
   return (
     <div className="p-4 space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900 mb-1">My Tables</h1>
         <p className="text-gray-600 text-sm">Manage your assigned tables</p>
       </div>
-      <MyTablesClient assignments={assignments || []} />
+      <MyTablesClient assignments={transformedAssignments} />
     </div>
   )
 }

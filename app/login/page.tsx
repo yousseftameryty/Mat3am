@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { getRoleRedirectPath } from '@/utils/auth'
+import { getRoleRedirectPath } from '@/utils/auth-types'
 import { motion } from 'framer-motion'
 import { LogIn, Lock, User } from 'lucide-react'
 

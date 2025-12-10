@@ -31,8 +31,8 @@ export default function AuditLogViewer({ initialLogs }: AuditLogViewerProps) {
   const [filterActor, setFilterActor] = useState<string>('all')
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
 
-  const entityTypes = ['all', ...Array.from(new Set(logs.map(log => log.entity_type).filter(Boolean)))]
-  const actors = ['all', ...Array.from(new Set(logs.map(log => log.profiles?.full_name).filter(Boolean)))]
+  const entityTypes = ['all', ...Array.from(new Set(logs.map(log => log.entity_type).filter((type): type is string => Boolean(type))))]
+  const actors = ['all', ...Array.from(new Set(logs.map(log => log.profiles?.full_name).filter((name): name is string => Boolean(name))))]
 
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
@@ -99,7 +99,7 @@ export default function AuditLogViewer({ initialLogs }: AuditLogViewerProps) {
               className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               {entityTypes.map(type => (
-                <option key={type} value={type}>{type === 'all' ? 'All Types' : type}</option>
+                <option key={type} value={type || ''}>{type === 'all' ? 'All Types' : type}</option>
               ))}
             </select>
           </div>
