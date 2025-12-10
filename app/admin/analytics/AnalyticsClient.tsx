@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { BarChart3, TrendingUp, Clock, Users, DollarSign } from 'lucide-react'
+import { formatCurrency } from '@/utils/currency'
 
 interface OrderAnalytics {
   id: string
@@ -193,9 +194,9 @@ export default function AnalyticsClient({
                     <td className="py-2 text-sm font-medium text-gray-900">{emp.full_name}</td>
                     <td className="py-2 text-sm text-gray-600 capitalize">{emp.role}</td>
                     <td className="py-2 text-sm text-right text-gray-900">{emp.orders_handled}</td>
-                    <td className="py-2 text-sm text-right text-gray-900">${Number(emp.revenue_generated).toFixed(2)}</td>
+                    <td className="py-2 text-sm text-right text-gray-900">{formatCurrency(emp.revenue_generated)}</td>
                     <td className="py-2 text-sm text-right text-gray-600">{Number(emp.orders_per_hour).toFixed(1)}</td>
-                    <td className="py-2 text-sm text-right font-medium text-green-600">${Number(emp.revenue_per_hour).toFixed(2)}</td>
+                    <td className="py-2 text-sm text-right font-medium text-green-600">{formatCurrency(emp.revenue_per_hour)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -225,8 +226,8 @@ export default function AnalyticsClient({
                   <tr key={table.table_id} className="border-b border-gray-100">
                     <td className="py-2 text-sm font-medium text-gray-900">Table {table.table_id}</td>
                     <td className="py-2 text-sm text-right text-gray-900">{table.total_orders}</td>
-                    <td className="py-2 text-sm text-right text-gray-900">${Number(table.total_revenue).toFixed(2)}</td>
-                    <td className="py-2 text-sm text-right text-gray-600">${Number(table.average_order_value).toFixed(2)}</td>
+                    <td className="py-2 text-sm text-right text-gray-900">{formatCurrency(table.total_revenue)}</td>
+                    <td className="py-2 text-sm text-right text-gray-600">{formatCurrency(table.average_order_value)}</td>
                     <td className="py-2 text-sm text-right text-gray-600">
                       {formatTime(Number(table.average_turnover_seconds))}
                     </td>
@@ -261,7 +262,7 @@ export default function AnalyticsClient({
                         style={{ width: `${percentage}%` }}
                       />
                       <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-900">
-                        ${revenue.toFixed(2)}
+                        {formatCurrency(revenue)}
                       </span>
                     </div>
                   </div>

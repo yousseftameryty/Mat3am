@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/utils/currency";
 
 type Table = {
   id: number;
@@ -139,7 +140,7 @@ export default function TablesPage() {
                       <div className="w-full mt-3 pt-3 border-t border-green-200 space-y-1">
                         <p className="text-xs text-gray-500">Order #{order.id.slice(0, 6)}</p>
                         <p className="text-sm font-bold text-green-600">
-                          ${parseFloat(order.total_price.toString()).toFixed(2)}
+                          {formatCurrency(order.total_price)}
                         </p>
                         <p className="text-xs text-gray-500 capitalize">{order.status}</p>
                       </div>

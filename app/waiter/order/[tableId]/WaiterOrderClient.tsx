@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { motion } from 'framer-motion'
 import { Plus, Minus, ShoppingBag, AlertTriangle } from 'lucide-react'
+import { formatCurrency } from '@/utils/currency'
 
 interface MenuItem {
   id: number
@@ -181,7 +182,7 @@ export default function WaiterOrderClient({
               >
                 <div className="font-bold text-gray-900 mb-1">{item.name}</div>
                 <div className="text-sm text-gray-600 capitalize mb-2">{item.category}</div>
-                <div className="font-bold text-green-600">${Number(item.price).toFixed(2)}</div>
+                <div className="font-bold text-green-600">{formatCurrency(item.price)}</div>
               </motion.button>
             ))}
           </div>
@@ -202,7 +203,7 @@ export default function WaiterOrderClient({
                 <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium text-sm">{item.name}</div>
-                    <div className="text-xs text-gray-500">${item.price.toFixed(2)} each</div>
+                    <div className="text-xs text-gray-500">{formatCurrency(item.price)} each</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -256,15 +257,15 @@ export default function WaiterOrderClient({
           <div className="border-t border-gray-200 pt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Tax (10%)</span>
-              <span>${tax.toFixed(2)}</span>
+              <span>{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
               <span>Total</span>
-              <span className="text-green-600">${total.toFixed(2)}</span>
+              <span className="text-green-600">{formatCurrency(total)}</span>
             </div>
           </div>
 

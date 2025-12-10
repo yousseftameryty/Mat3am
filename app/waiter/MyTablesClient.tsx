@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { UtensilsCrossed, Plus, Clock } from 'lucide-react'
+import { formatCurrency } from '@/utils/currency'
 
 interface TableAssignment {
   table_id: number
@@ -92,7 +93,7 @@ export default function MyTablesClient({ assignments }: MyTablesClientProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total</span>
-                  <span className="font-bold text-green-600">${Number(order.total_price).toFixed(2)}</span>
+                  <span className="font-bold text-green-600">{formatCurrency(order.total_price)}</span>
                 </div>
                 <button className="w-full mt-3 py-2 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors">
                   View Order

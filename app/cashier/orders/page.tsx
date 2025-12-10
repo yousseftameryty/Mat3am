@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { updateOrderStatus } from "@/app/actions";
+import { formatCurrency } from "@/utils/currency";
 import { useRouter } from "next/navigation";
 
 type Order = {
@@ -193,7 +194,7 @@ export default function OrdersPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Total</span>
                       <span className="font-bold text-green-600">
-                        ${parseFloat(order.total_price.toString()).toFixed(2)}
+                        {formatCurrency(order.total_price)}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500">

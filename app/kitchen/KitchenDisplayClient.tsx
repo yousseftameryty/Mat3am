@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, CheckCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { formatCurrency } from '@/utils/currency'
 
 interface OrderItem {
   id: number
@@ -169,7 +170,7 @@ export default function KitchenDisplayClient({ initialOrders }: KitchenDisplayCl
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-black text-green-600">
-                    ${Number(order.total_price).toFixed(2)}
+                    {formatCurrency(order.total_price)}
                   </div>
                   <div className={`text-xs px-2 py-1 rounded-full mt-1 ${
                     order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'

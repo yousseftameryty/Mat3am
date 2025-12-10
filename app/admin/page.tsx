@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { DollarSign, ShoppingBag, TrendingUp, Users, Clock, UtensilsCrossed } from 'lucide-react'
 import { format } from 'date-fns'
+import { formatCurrency } from '@/utils/currency'
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -87,7 +88,7 @@ export default async function AdminDashboard() {
   const stats = [
     {
       label: "Today's Revenue",
-      value: `$${todayRevenue.toFixed(2)}`,
+      value: formatCurrency(todayRevenue),
       icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-100",
@@ -188,7 +189,7 @@ export default async function AdminDashboard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">${Number(order.total_price || 0).toFixed(2)}</p>
+                    <p className="font-bold text-gray-900">{formatCurrency(order.total_price || 0)}</p>
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       order.status === 'paid' ? 'bg-green-100 text-green-700' :
                       order.status === 'cooking' ? 'bg-orange-100 text-orange-700' :

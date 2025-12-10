@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { createOrder } from "../actions";
+import { formatCurrency } from "@/utils/currency";
 
 // --- CATEGORIES ---
 const CATEGORIES = [
@@ -311,7 +312,7 @@ export default function CashierDashboard() {
                                     <p className="text-xs text-gray-500 capitalize">{item.category}</p>
                                 </div>
                                 <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg text-sm border border-green-200">
-                                    ${item.price.toFixed(2)}
+                                    {formatCurrency(item.price)}
                                 </span>
                             </div>
                         </motion.div>
@@ -372,10 +373,10 @@ export default function CashierDashboard() {
                             </div>
                             <div className="flex-1">
                                 <h4 className="font-medium text-gray-900">{item.name}</h4>
-                                <div className="text-xs text-gray-500">${item.price.toFixed(2)} / unit</div>
+                                <div className="text-xs text-gray-500">{formatCurrency(item.price)} / unit</div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="font-bold text-green-600">${(item.price * item.qty).toFixed(2)}</span>
+                                <span className="font-bold text-green-600">{formatCurrency(item.price * item.qty)}</span>
                                 
                                 <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => updateQty(item.id, 1)} className="text-gray-400 hover:text-green-600">
@@ -395,17 +396,17 @@ export default function CashierDashboard() {
         {/* Footer / Checkout */}
         <div className="p-6 bg-gradient-to-b from-white to-green-50/30 border-t border-green-200 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
             <div className="space-y-2 mb-6">
-                <div className="flex justify-between text-gray-600 text-sm">
+                                <div className="flex justify-between text-gray-600 text-sm">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 text-sm">
                     <span>Tax (10%)</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>{formatCurrency(tax)}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 text-xl font-bold pt-2 border-t border-green-200 mt-2">
                     <span>Total</span>
-                    <span className="text-green-600">${total.toFixed(2)}</span>
+                    <span className="text-green-600">{formatCurrency(total)}</span>
                 </div>
             </div>
 

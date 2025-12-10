@@ -8,6 +8,7 @@ import {
   Utensils, CreditCard, MessageSquare, Loader2
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { formatCurrency } from "@/utils/currency";
 import { getOrderByTable, updateOrderStatus } from "@/app/actions";
 import MenuView from "./MenuView";
 import { recordTableAccess } from "@/utils/deviceFingerprint";
@@ -297,7 +298,7 @@ export default function CustomerTablePage() {
                                 <span className="font-bold">{item.quantity}x</span>
                                 <span className="uppercase">{item.menu_items.name}</span>
                             </div>
-                            <span>${(parseFloat(item.price_at_time.toString()) * item.quantity).toFixed(2)}</span>
+                            <span>{formatCurrency(parseFloat(item.price_at_time.toString()) * item.quantity)}</span>
                         </motion.div>
                     ))}
                 </div>
@@ -313,15 +314,15 @@ export default function CustomerTablePage() {
                 >
                     <div className="flex justify-between text-gray-500 text-sm">
                         <span>Subtotal</span>
-                        <span>${total.toFixed(2)}</span>
+                        <span>{formatCurrency(total)}</span>
                     </div>
                     <div className="flex justify-between text-gray-500 text-sm">
                         <span>Service (10%)</span>
-                        <span>${serviceCharge.toFixed(2)}</span>
+                        <span>{formatCurrency(serviceCharge)}</span>
                     </div>
                     <div className="flex justify-between text-xl font-black mt-4">
                         <span>TOTAL</span>
-                        <span>${finalTotal.toFixed(2)}</span>
+                        <span>{formatCurrency(finalTotal)}</span>
                     </div>
                 </motion.div>
 
@@ -365,7 +366,7 @@ export default function CustomerTablePage() {
                 onClick={handleRequestPayment}
                 className="flex-[2] bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-500/30 active:scale-95 transition-transform hover:from-green-600 hover:to-emerald-700"
               >
-                  <CreditCard size={18} /> Pay ${finalTotal.toFixed(2)}
+                  <CreditCard size={18} /> Pay {formatCurrency(finalTotal)}
               </button>
           </div>
         </motion.div>

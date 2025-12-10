@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Plus, Edit, Trash2, Image as ImageIcon, Search, ToggleLeft, ToggleRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { formatCurrency } from '@/utils/currency'
+import ImageUploader from './ImageUploader'
 
 interface MenuItem {
   id: number
@@ -51,7 +53,7 @@ export default function MenuCMSClient({ initialMenuItems }: MenuCMSClientProps) 
     }
   }
 
-  const handleSaveItem = async (formData: FormData) => {
+  const handleSaveItem = async (formData: FormData, imageUrl?: string) => {
     setLoading(true)
     try {
       const supabase = createClient()
@@ -62,6 +64,7 @@ export default function MenuCMSClient({ initialMenuItems }: MenuCMSClientProps) 
         price: formData.get('price') as string,
         category: formData.get('category') as string,
         is_available: formData.get('is_available') === 'true',
+        image_url: imageUrl || formData.get('image_url') as string || null,
       }
 
       if (id) {
@@ -162,7 +165,7 @@ export default function MenuCMSClient({ initialMenuItems }: MenuCMSClientProps) 
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold text-gray-900">{item.name}</h3>
-                <span className="font-bold text-green-600">${Number(item.price).toFixed(2)}</span>
+                <span className="font-bold text-green-600">{formatCurrency(item.price)}</span>
               </div>
               <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description || 'No description'}</p>
               <div className="flex items-center justify-between">
@@ -192,6 +195,10 @@ export default function MenuCMSClient({ initialMenuItems }: MenuCMSClientProps) 
             }}
             onSave={handleSaveItem}
             loading={loading}
+            menuItems={menuItems}
+            setMenuItems={setMenuItems}
+            setEditingItem={setEditingItem}
+            setShowCreateModal={setShowCreateModal}
           />
         )}
       </AnimatePresence>
@@ -204,16 +211,26 @@ function MenuItemModal({
   onClose,
   onSave,
   loading,
+  menuItems,
+  setMenuItems,
+  setEditingItem,
+  setShowCreateModal,
 }: {
   item: MenuItem | null
   onClose: () => void
-  onSave: (formData: FormData) => void
+  onSave: (formData: FormData, imageUrl?: string) => void
   loading: boolean
+  menuItems: MenuItem[]
+  setMenuItems: (items: MenuItem[]) => void
+  setEditingItem: (item: MenuItem | null) => void
+  setShowCreateModal: (show: boolean) => void
 }) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(item?.image_url || null)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    onSave(formData)
+    await onSave(formData, imageUrl || undefined)
   }
 
   return (
@@ -278,6 +295,10 @@ function MenuItemModal({
               />
             </div>
           </div>
+          <ImageUploader
+            currentImageUrl={item?.image_url || null}
+            onImageUploaded={(url) => setImageUrl(url)}
+          />
           <div>
             <label className="flex items-center gap-2">
               <input

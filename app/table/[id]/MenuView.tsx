@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { createOrder } from "@/app/actions";
+import { formatCurrency } from "@/utils/currency";
 import { getDeviceFingerprint, getTableAccess, getOriginalTable, recordTableAccess } from "@/utils/deviceFingerprint";
 import { useRouter } from "next/navigation";
 
@@ -322,7 +323,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
               <h3 className="font-semibold text-sm mb-1 group-hover:text-green-600 transition-colors text-gray-900">{item.name}</h3>
               <p className="text-xs text-gray-500 mb-2 capitalize">{item.category}</p>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-green-600">${item.price.toFixed(2)}</span>
+                <span className="font-bold text-green-600">{formatCurrency(item.price)}</span>
                 <button className="bg-green-100 hover:bg-green-200 p-1.5 rounded-lg transition-colors text-green-600">
                   <Plus size={14} />
                 </button>
@@ -345,7 +346,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
                 <div key={item.id} className="flex items-center justify-between py-2 border-b border-green-100 last:border-0">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                    <p className="text-xs text-gray-600">${item.price.toFixed(2)} each</p>
+                    <p className="text-xs text-gray-600">{formatCurrency(item.price)} each</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <button onClick={() => updateQty(item.id, -1)} className="p-1 hover:bg-green-100 rounded text-gray-600 hover:text-green-600">
@@ -361,15 +362,15 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
             </div>
             <div className="flex items-center justify-between mb-4 text-sm text-gray-700">
               <span>Subtotal</span>
-              <span className="font-bold">${subtotal.toFixed(2)}</span>
+              <span className="font-bold">{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex items-center justify-between mb-4 text-sm text-gray-700">
               <span>Tax (10%)</span>
-              <span className="font-bold">${tax.toFixed(2)}</span>
+              <span className="font-bold">{formatCurrency(tax)}</span>
             </div>
             <div className="flex items-center justify-between mb-4 pb-4 border-b border-green-200">
               <span className="text-lg font-bold text-gray-900">Total</span>
-              <span className="text-xl font-black text-green-600">${total.toFixed(2)}</span>
+              <span className="text-xl font-black text-green-600">{formatCurrency(total)}</span>
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -378,7 +379,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
               disabled={isProcessing}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all"
             >
-              {isProcessing ? "Processing..." : `Place Order - $${total.toFixed(2)}`}
+              {isProcessing ? "Processing..." : `Place Order - ${formatCurrency(total)}`}
             </motion.button>
           </div>
         </motion.div>
@@ -408,7 +409,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
                 <h3 className="text-xl font-bold text-gray-900">Confirm Your Order</h3>
               </div>
               <p className="text-gray-600 mb-6">
-                You're about to place an order for <strong className="text-green-600">${total.toFixed(2)}</strong>.
+                You're about to place an order for <strong className="text-green-600">{formatCurrency(total)}</strong>.
                 Please review your items before confirming.
               </p>
               <div className="flex gap-3">
@@ -459,13 +460,13 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
                   {cart.map((item) => (
                     <div key={item.id} className="flex justify-between text-xs">
                       <span className="text-gray-600">{item.qty}x {item.name}</span>
-                      <span className="text-gray-900 font-medium">${(item.price * item.qty).toFixed(2)}</span>
+                      <span className="text-gray-900 font-medium">{formatCurrency(item.price * item.qty)}</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex justify-between mt-3 pt-3 border-t border-green-200">
                   <span className="font-bold text-gray-900">Total</span>
-                  <span className="font-black text-green-600">${total.toFixed(2)}</span>
+                  <span className="font-black text-green-600">{formatCurrency(total)}</span>
                 </div>
               </div>
               <div className="flex gap-3">
