@@ -15,7 +15,7 @@ export default function Home() {
             <h1 className="text-6xl md:text-7xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
               Hazara Kabab
             </h1>
-            <p className="text-xl md:text-2xl text-gray-700 font-medium">Authentic Afghan Cuisine</p>
+            <p className="text-xl md:text-2xl text-gray-700 font-medium">Authentic Pakistani Cuisine</p>
           </div>
 
           {/* Main CTA */}
@@ -78,7 +78,7 @@ export default function Home() {
           <div className="mt-12 text-center">
             <p className="text-sm text-gray-500 mb-4">Want to see how it works?</p>
             <Link
-              href="/table/1"
+              href="/table/demo"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all"
             >
               <ChefHat className="w-5 h-5" />

@@ -9,7 +9,6 @@ import {
 import { createClient } from "@/utils/supabase/client";
 import { createOrder } from "@/app/actions";
 import { formatCurrency } from "@/utils/currency";
-import { getDeviceFingerprint, getTableAccess, getOriginalTable, recordTableAccess } from "@/utils/deviceFingerprint";
 import { useRouter } from "next/navigation";
 
 const CATEGORIES = [
@@ -63,6 +62,8 @@ type MenuViewProps = {
 
 export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
   const router = useRouter();
+  // Handle demo table (999 becomes 1)
+  const actualTableId = tableId === 999 ? 1 : tableId;
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -73,9 +74,6 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    // Record table access when menu is viewed
-    recordTableAccess(tableId);
-    
     async function fetchMenu() {
       const supabase = createClient();
       const { data: items, error } = await supabase
@@ -97,7 +95,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
       setLoading(false);
     }
     fetchMenu();
-  }, [tableId]);
+  }, []);
 
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
@@ -145,65 +143,11 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
     setShowConfirm2(false);
     
     try {
-      // Gather validation data for security
-      const fingerprint = getDeviceFingerprint();
-      const tableAccess = getTableAccess(tableId);
-      const originalTable = getOriginalTable();
-
-      // Ensure we have a valid timestamp (use current time if not found)
-      const accessTimestamp = tableAccess?.timestamp || Date.now();
-
-      const validationData = {
-        deviceFingerprint: fingerprint,
-        tableAccessTimestamp: accessTimestamp,
-        originalTableId: originalTable,
-      };
-      
-      console.log('[MenuView] Creating order with validation data:', {
-        tableId,
-        accessTimestamp,
-        originalTable,
-        timeSinceAccess: Date.now() - accessTimestamp,
-        cartItems: cart.length
-      });
-
-      const result = await createOrder(tableId, cart, total, validationData);
-      
-      console.log('[MenuView] Order creation result:', result);
-      
-      // Silent redirect if trying to order for different table
-      if (!result.success && result.redirectToTable && result.redirectToTable !== tableId) {
-        console.log(`[MenuView] Redirecting to table ${result.redirectToTable}`);
-        router.push(`/table/${result.redirectToTable}`);
-        return;
-      }
+      const result = await createOrder(actualTableId, cart, total);
       
       if (result.success) {
         console.log(`[MenuView] Order created successfully: ${result.orderId}`);
-        // Lock customer to this table ONLY after successful order
-        // Store as original table for future orders
-        const fingerprint = getDeviceFingerprint();
-        const accessLog = JSON.parse(localStorage.getItem('order_access_log') || '[]');
         
-        // Check if this is the first order (no original table set yet)
-        const hasOriginalTable = accessLog.length > 0 && accessLog[0]?.fingerprint === fingerprint;
-        
-        if (!hasOriginalTable) {
-          // Set this as the original table (prepend to log)
-          accessLog.unshift({
-            tableId,
-            fingerprint,
-            timestamp: Date.now(),
-          });
-          // Keep only last 10 entries
-          if (accessLog.length > 10) {
-            accessLog.pop();
-          }
-          localStorage.setItem('order_access_log', JSON.stringify(accessLog));
-        }
-        
-        // Record successful order attempt
-        recordTableAccess(tableId);
         
         // Clear cart immediately
         setCart([]);
@@ -258,7 +202,7 @@ export default function MenuView({ tableId, onOrderCreated }: MenuViewProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
-              Table {tableId} Menu
+              Table {tableId === 999 ? 'Demo' : tableId} Menu
             </h1>
             <p className="text-gray-600 text-sm mt-1">Browse and order items</p>
           </div>

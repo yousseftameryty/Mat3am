@@ -11,7 +11,6 @@ import { createClient } from "@/utils/supabase/client";
 import { formatCurrency } from "@/utils/currency";
 import { getOrderByTable, updateOrderStatus } from "@/app/actions";
 import MenuView from "./MenuView";
-import { recordTableAccess } from "@/utils/deviceFingerprint";
 
 type OrderItem = {
   id: number;
@@ -33,7 +32,10 @@ type Order = {
 
 export default function CustomerTablePage() {
   const params = useParams();
-  const tableId = parseInt(params?.id as string) || 1;
+  // Handle demo table
+  const tableIdParam = params?.id as string;
+  const tableId = tableIdParam === 'demo' ? 999 : (parseInt(tableIdParam) || 1);
+  const actualTableId = tableId === 999 ? 1 : tableId;
   const [mounted, setMounted] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,8 +44,8 @@ export default function CustomerTablePage() {
   const fetchOrder = useCallback(async () => {
     try {
       setLoading(true);
-      console.log(`Fetching order for table ${tableId}...`);
-      const result = await getOrderByTable(tableId);
+      console.log(`Fetching order for table ${actualTableId}...`);
+      const result = await getOrderByTable(actualTableId);
       
       console.log('Order fetch result:', result);
       
@@ -63,25 +65,23 @@ export default function CustomerTablePage() {
     } finally {
       setLoading(false);
     }
-  }, [tableId]);
+  }, [actualTableId]);
 
   useEffect(() => {
     setMounted(true);
-    // Record table access with device fingerprint
-    recordTableAccess(tableId);
     fetchOrder();
     
     // Set up real-time subscription for orders
     const supabase = createClient();
     const ordersChannel = supabase
-      .channel(`table-orders-${tableId}`)
+      .channel(`table-orders-${actualTableId}`)
       .on(
         'postgres_changes' as any,
         {
           event: '*', // Listen to both INSERT and UPDATE
           schema: 'public',
           table: 'orders',
-          filter: `table_id=eq.${tableId}`,
+          filter: `table_id=eq.${actualTableId}`,
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (_payload: unknown) => {
@@ -95,14 +95,14 @@ export default function CustomerTablePage() {
 
     // Also subscribe to table changes (for when table is reset)
     const tablesChannel = supabase
-      .channel(`table-status-${tableId}`)
+      .channel(`table-status-${actualTableId}`)
       .on(
         'postgres_changes' as any,
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'restaurant_tables',
-          filter: `id=eq.${tableId}`,
+          filter: `id=eq.${actualTableId}`,
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (_payload: unknown) => {
@@ -116,7 +116,7 @@ export default function CustomerTablePage() {
       supabase.removeChannel(ordersChannel);
       supabase.removeChannel(tablesChannel);
     };
-  }, [tableId, fetchOrder]);
+  }, [actualTableId, fetchOrder]);
 
   const status = order?.status || "pending";
   const orderItems = order?.order_items || [];
@@ -160,7 +160,7 @@ export default function CustomerTablePage() {
 
   // Show menu if no order exists
   if (error || !order) {
-    return <MenuView tableId={tableId} onOrderCreated={fetchOrder} />;
+    return <MenuView tableId={tableId === 999 ? 1 : tableId} onOrderCreated={fetchOrder} />;
   }
 
   return (
@@ -173,7 +173,7 @@ export default function CustomerTablePage() {
             <span className="text-xs font-mono uppercase tracking-widest text-gray-600">Live Connection</span>
         </div>
         <div className="bg-white backdrop-blur-md border border-green-200 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm text-gray-900">
-            Table #{tableId}
+            Table #{tableId === 999 ? 'Demo' : tableId}
         </div>
       </div>
 

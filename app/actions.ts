@@ -11,54 +11,12 @@ type CartItem = {
   price: number;
 };
 
-type OrderValidationData = {
-  deviceFingerprint: string;
-  tableAccessTimestamp: number;
-  originalTableId: number | null;
-};
-
 export async function createOrder(
   tableId: number, 
   cartItems: CartItem[], 
-  total: number,
-  validationData?: OrderValidationData
+  total: number
 ) {
   const supabase = await createClient()
-
-  // SECURITY VALIDATION - Prevent table manipulation
-  if (validationData) {
-    const TEN_MINUTES = 10 * 60 * 1000;
-    const now = Date.now();
-
-    // 1. Time-based validation: Must have accessed table page recently (within 10 minutes)
-    // Allow if timestamp is 0 or very recent (within last 10 minutes)
-    const timeSinceAccess = now - validationData.tableAccessTimestamp;
-    
-    // Only check time if we have a valid timestamp (not 0 or negative)
-    // If timestamp is recent (set to Date.now() as fallback), it will be 0 or very small
-    if (validationData.tableAccessTimestamp > 0 && timeSinceAccess > TEN_MINUTES && timeSinceAccess < (24 * 60 * 60 * 1000)) {
-      // Only reject if timestamp is old AND not from today (to avoid rejecting fresh fallback timestamps)
-      console.log('Security check: Table access expired', { timeSinceAccess, TEN_MINUTES });
-      return { 
-        success: false, 
-        error: 'Table access expired. Please scan the QR code again.',
-        redirectToTable: validationData.originalTableId || null
-      };
-    }
-
-    // 2. Silent redirect: If customer already placed an order for a different table, redirect to that table
-    // Only enforce this AFTER they've placed their first order (originalTableId exists)
-    if (validationData.originalTableId && validationData.originalTableId !== tableId) {
-      console.log('Security check: Redirecting to original table', { originalTableId: validationData.originalTableId, requestedTableId: tableId });
-      return { 
-        success: false, 
-        error: null, // No error message - silent redirect
-        redirectToTable: validationData.originalTableId
-      };
-    }
-
-    console.log('Security check: Passed', { tableId, timeSinceAccess, originalTableId: validationData.originalTableId });
-  }
 
   // 0. Check if table exists, create it if it doesn't
   const { data: existingTable } = await supabase
@@ -79,7 +37,7 @@ export async function createOrder(
 
     if (tableError) {
       console.error('Table Creation Error:', tableError)
-      return { success: false, error: `Failed to create table ${tableId}: ${tableError.message}`, redirectToTable: null }
+      return { success: false, error: `Failed to create table ${tableId}: ${tableError.message}` }
     }
   } else {
     // 4. Table occupancy check: Prevent ordering for occupied tables
@@ -99,8 +57,7 @@ export async function createOrder(
         // For now, we'll reject to prevent abuse
         return { 
           success: false, 
-          error: `Table ${tableId} is currently occupied. Please wait or contact staff.`,
-          redirectToTable: validationData?.originalTableId || null
+          error: `Table ${tableId} is currently occupied. Please wait or contact staff.`
         };
       } else {
         console.log(`[createOrder] Table ${tableId} marked as occupied but no active order found, allowing new order`);
@@ -147,7 +104,7 @@ export async function createOrder(
 
   if (itemsError) {
     console.error('Items Error:', itemsError)
-    return { success: false, error: itemsError.message, redirectToTable: null }
+    return { success: false, error: itemsError.message }
   }
 
   // 3. Update Table Status to Occupied
@@ -172,7 +129,7 @@ export async function createOrder(
   // 5. Refresh Data
   revalidatePath('/cashier')
   
-  return { success: true, orderId: order.id, redirectToTable: null }
+  return { success: true, orderId: order.id }
 }
 
 export async function getOrderByTable(tableId: number) {
