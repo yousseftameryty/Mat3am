@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { getRoleRedirectPath } from '@/utils/auth-types'
 import { motion } from 'framer-motion'
 import { LogIn, Lock, User } from 'lucide-react'
+import { checkProfileStatus } from './actions'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -35,28 +36,17 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Get user profile to determine role
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, is_active')
-          .eq('id', data.user.id)
-          .single()
+        // Get user profile to determine role (using server action to bypass RLS issues)
+        const profileResult = await checkProfileStatus(data.user.id)
 
-        if (profileError) {
-          console.error('Profile fetch error:', profileError)
-          setError(`Error loading profile: ${profileError.message}`)
-          setLoading(false)
-          return
-        }
-
-        if (!profile) {
-          setError('Profile not found. Please contact administrator.')
+        if (!profileResult.success || !profileResult.profile) {
+          setError(profileResult.error || 'Profile not found. Please contact administrator.')
           await supabase.auth.signOut()
           setLoading(false)
           return
         }
 
-        if (!profile.is_active) {
+        if (!profileResult.profile.is_active) {
           setError('Account is inactive. Please contact administrator.')
           await supabase.auth.signOut()
           setLoading(false)
@@ -64,7 +54,7 @@ export default function LoginPage() {
         }
 
         // Redirect based on role
-        const redirectPath = getRoleRedirectPath(profile.role as any)
+        const redirectPath = getRoleRedirectPath(profileResult.profile.role as any)
         router.push(redirectPath)
         router.refresh()
       }
